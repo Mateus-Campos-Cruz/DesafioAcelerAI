@@ -1,193 +1,24 @@
 ﻿Country Code,Country Name,Indicator Code,Indicador Label,Ano Inicio,Ano Fim,Valor Inicio,Valor Fim,Crescimento Absoluto,Crescimento %,CAGR %,N Obs,Rank Valor Atual,Rank Crescimento %
-ARG,Argentina,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,100.0,98.18,-1.82,-1.82,-0.092,14,10.0,17.0
-BRA,Brazil,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,91.75,100.0,8.25,8.99,0.431,19,1.0,3.0
-CHL,Chile,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,97.12,100.0,2.88,2.97,0.146,19,1.0,8.0
-CHN,China,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,94.81,100.0,5.19,5.47,0.267,17,1.0,6.0
-COL,Colombia,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2001,2020,99.71,100.0,0.29,0.29,0.015,19,1.0,10.0
-DEU,Germany,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,100.0,94.62,-5.38,-5.38,-0.276,19,15.0,21.0
-EGY,"Egypt, Arab Rep.",SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,75.68,100.0,24.32,32.14,1.403,21,1.0,1.0
-ETH,Ethiopia,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2001,2020,52.3,63.89,11.59,22.16,1.059,18,24.0,2.0
-FIN,Finland,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,97.13,89.93,-7.2,-7.41,-0.384,18,18.0,22.0
-FRA,France,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2001,2020,100.0,96.29,-3.71,-3.71,-0.199,17,12.0,18.0
-GBR,United Kingdom,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,95.59,94.45,-1.14,-1.19,-0.06,19,16.0,15.0
-IDN,Indonesia,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,93.7,100.0,6.3,6.72,0.326,20,1.0,4.0
-IND,India,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,73.93,76.23,2.3,3.11,0.153,19,22.0,7.0
-JPN,Japan,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,100.0,98.93,-1.07,-1.07,-0.054,19,9.0,14.0
-KOR,"Korea, Rep.",SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2001,2020,100.0,100.0,0.0,0.0,0.0,18,1.0,13.0
-MEX,Mexico,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,89.07,89.12,0.05,0.06,0.003,18,19.0,12.0
-NGA,Nigeria,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,60.52,64.44,3.92,6.48,0.314,18,23.0,5.0
-PER,Peru,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2001,2019,95.44,95.91,0.47,0.49,0.027,13,13.0,9.0
-RUS,Russian Federation,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,99.09,95.25,-3.84,-3.88,-0.197,17,14.0,19.0
-SAU,Saudi Arabia,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,96.25,91.57,-4.68,-4.86,-0.249,18,17.0,20.0
-SWE,Sweden,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,99.72,100.0,0.28,0.28,0.014,18,1.0,11.0
-TUR,Turkiye,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,96.7,83.14,-13.56,-14.02,-0.753,20,20.0,24.0
-USA,United States,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,99.64,98.01,-1.63,-1.64,-0.082,12,11.0,16.0
-ZAF,South Africa,SE.ADT.LITR.ZS,Taxa de alfabetização adultos (%),2000,2020,89.12,82.27,-6.85,-7.69,-0.399,21,21.0,23.0
-ARG,Argentina,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,100.0,100.0,0.0,0.0,0.0,18,1.0,13.0
-BRA,Brazil,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2001,2020,96.18,97.66,1.48,1.54,0.08,17,13.0,10.0
-CHL,Chile,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,96.98,94.79,-2.19,-2.26,-0.114,16,16.0,17.0
-CHN,China,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2018,98.04,94.02,-4.02,-4.1,-0.232,16,18.0,19.0
-COL,Colombia,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,92.6,100.0,7.4,7.99,0.385,18,1.0,4.0
-DEU,Germany,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2019,100.0,98.65,-1.35,-1.35,-0.072,16,9.0,15.0
-EGY,"Egypt, Arab Rep.",SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2017,94.66,100.0,5.34,5.64,0.323,17,1.0,5.0
-ETH,Ethiopia,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,53.97,75.59,21.62,40.06,1.699,19,24.0,1.0
-FIN,Finland,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,96.18,88.5,-7.68,-7.99,-0.415,19,22.0,23.0
-FRA,France,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2001,2020,97.75,87.12,-10.63,-10.87,-0.604,19,23.0,24.0
-GBR,United Kingdom,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2001,2020,100.0,92.84,-7.16,-7.16,-0.39,19,19.0,21.0
-IDN,Indonesia,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2019,97.65,98.42,0.77,0.79,0.041,15,10.0,11.0
-IND,India,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2019,87.92,96.38,8.46,9.62,0.485,17,14.0,3.0
-JPN,Japan,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,96.65,100.0,3.35,3.47,0.171,18,1.0,7.0
-KOR,"Korea, Rep.",SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2001,2020,99.4,100.0,0.6,0.6,0.032,17,1.0,12.0
-MEX,Mexico,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,95.96,94.32,-1.64,-1.71,-0.086,18,17.0,16.0
-NGA,Nigeria,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,70.61,98.35,27.74,39.29,1.671,18,11.0,2.0
-PER,Peru,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2002,2020,94.68,100.0,5.32,5.62,0.304,17,1.0,6.0
-RUS,Russian Federation,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,100.0,96.04,-3.96,-3.96,-0.202,20,15.0,18.0
-SAU,Saudi Arabia,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2019,100.0,99.02,-0.98,-0.98,-0.052,18,8.0,14.0
-SWE,Sweden,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,98.12,91.21,-6.91,-7.04,-0.364,19,20.0,20.0
-TUR,Turkiye,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,98.84,90.98,-7.86,-7.95,-0.413,18,21.0,22.0
-USA,United States,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,96.01,98.03,2.02,2.1,0.104,18,12.0,9.0
-ZAF,South Africa,SE.PRM.CMPT.ZS,Taxa de conclusão primária (%),2000,2020,97.21,100.0,2.79,2.87,0.142,18,1.0,8.0
-ARG,Argentina,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2001,2020,114.5,123.12,8.62,7.53,0.383,17,6.0,13.0
-BRA,Brazil,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,119.47,136.85,17.38,14.55,0.681,21,1.0,9.0
-CHL,Chile,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2019,103.33,108.99,5.66,5.48,0.281,14,15.0,15.0
-CHN,China,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2019,113.32,134.25,20.93,18.47,0.896,19,2.0,3.0
-COL,Colombia,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,110.41,117.23,6.82,6.18,0.3,16,11.0,14.0
-DEU,Germany,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2019,104.41,120.9,16.49,15.79,0.775,18,10.0,6.0
-EGY,"Egypt, Arab Rep.",SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,99.3,116.9,17.6,17.72,0.819,17,12.0,4.0
-ETH,Ethiopia,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,92.45,110.64,18.19,19.68,0.902,19,14.0,2.0
-FIN,Finland,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,94.25,96.18,1.93,2.05,0.101,19,23.0,16.0
-FRA,France,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,105.53,122.18,16.65,15.78,0.735,21,8.0,7.0
-GBR,United Kingdom,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,102.46,104.27,1.81,1.77,0.088,17,16.0,17.0
-IDN,Indonesia,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,109.4,127.9,18.5,16.91,0.784,21,3.0,5.0
-IND,India,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2019,106.65,121.72,15.07,14.13,0.698,17,9.0,11.0
-JPN,Japan,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,103.63,98.58,-5.05,-4.87,-0.249,17,21.0,24.0
-KOR,"Korea, Rep.",SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2001,2020,98.82,98.65,-0.17,-0.17,-0.009,20,20.0,19.0
-MEX,Mexico,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,108.42,122.39,13.97,12.89,0.608,17,7.0,12.0
-NGA,Nigeria,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2019,85.7,127.85,42.15,49.18,2.128,20,4.0,1.0
-PER,Peru,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,107.71,123.32,15.61,14.49,0.679,17,5.0,10.0
-RUS,Russian Federation,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,101.6,116.74,15.14,14.9,0.697,18,13.0,8.0
-SAU,Saudi Arabia,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2019,100.44,101.63,1.19,1.18,0.062,18,19.0,18.0
-SWE,Sweden,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,97.69,95.83,-1.86,-1.9,-0.096,16,24.0,22.0
-TUR,Turkiye,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,104.68,103.85,-0.83,-0.79,-0.04,18,17.0,21.0
-USA,United States,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,100.44,96.58,-3.86,-3.84,-0.196,16,22.0,23.0
-ZAF,South Africa,SE.PRM.ENRR,Taxa de matrícula primária (bruta %),2000,2020,102.92,102.71,-0.21,-0.2,-0.01,19,18.0,20.0
-ARG,Argentina,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2019,99.69,100.0,0.31,0.31,0.016,18,1.0,17.0
-BRA,Brazil,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,96.58,100.0,3.42,3.54,0.174,19,1.0,9.0
-CHL,Chile,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,95.26,99.95,4.69,4.92,0.241,18,8.0,7.0
-CHN,China,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,97.58,99.0,1.42,1.46,0.072,19,10.0,14.0
-COL,Colombia,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,89.55,100.0,10.45,11.67,0.553,16,1.0,2.0
-DEU,Germany,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,98.61,95.84,-2.77,-2.81,-0.142,18,15.0,20.0
-EGY,"Egypt, Arab Rep.",SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,94.39,100.0,5.61,5.94,0.289,19,1.0,6.0
-ETH,Ethiopia,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,80.39,78.29,-2.1,-2.61,-0.132,17,24.0,19.0
-FIN,Finland,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,95.97,96.92,0.95,0.99,0.049,19,14.0,16.0
-FRA,France,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,96.36,92.56,-3.8,-3.94,-0.201,19,20.0,21.0
-GBR,United Kingdom,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,100.0,94.77,-5.23,-5.23,-0.268,19,18.0,22.0
-IDN,Indonesia,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,92.24,98.36,6.12,6.63,0.322,19,12.0,4.0
-IND,India,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,94.31,100.0,5.69,6.03,0.293,15,1.0,5.0
-JPN,Japan,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2001,2020,100.0,98.56,-1.44,-1.44,-0.076,17,11.0,18.0
-KOR,"Korea, Rep.",SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,97.21,99.5,2.29,2.36,0.116,16,9.0,12.0
-MEX,Mexico,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2001,2019,98.86,100.0,1.14,1.15,0.064,16,1.0,15.0
-NGA,Nigeria,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,63.31,94.9,31.59,49.9,2.045,18,17.0,1.0
-PER,Peru,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,92.35,100.0,7.65,8.28,0.399,19,1.0,3.0
-RUS,Russian Federation,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,97.31,89.57,-7.74,-7.95,-0.414,18,22.0,24.0
-SAU,Saudi Arabia,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,88.2,90.33,2.13,2.41,0.119,16,21.0,11.0
-SWE,Sweden,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2001,2020,96.31,98.34,2.03,2.11,0.11,18,13.0,13.0
-TUR,Turkiye,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,91.19,94.47,3.28,3.6,0.177,21,19.0,8.0
-USA,United States,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,92.93,95.76,2.83,3.05,0.15,17,16.0,10.0
-ZAF,South Africa,SE.PRM.TENR,Taxa de matrícula primária (líquida %),2000,2020,95.69,88.17,-7.52,-7.86,-0.408,18,23.0,23.0
-ARG,Argentina,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2002,2019,107.27,116.64,9.37,8.73,0.494,15,5.0,11.0
-BRA,Brazil,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,100.51,103.53,3.02,3.0,0.148,20,14.0,17.0
-CHL,Chile,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,91.73,78.38,-13.35,-14.55,-0.783,20,22.0,24.0
-CHN,China,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,86.53,104.38,17.85,20.63,0.942,19,13.0,5.0
-COL,Colombia,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,86.42,103.18,16.76,19.39,0.89,16,15.0,6.0
-DEU,Germany,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,105.89,107.23,1.34,1.27,0.063,17,9.0,18.0
-EGY,"Egypt, Arab Rep.",SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,89.34,92.71,3.37,3.77,0.185,18,19.0,15.0
-ETH,Ethiopia,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,36.05,63.67,27.62,76.62,2.885,18,23.0,1.0
-FIN,Finland,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2001,2020,127.27,133.22,5.95,4.68,0.241,19,1.0,14.0
-FRA,France,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2019,113.68,112.02,-1.66,-1.46,-0.077,18,6.0,21.0
-GBR,United Kingdom,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,122.93,130.67,7.74,6.3,0.306,17,2.0,12.0
-IDN,Indonesia,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,83.07,105.66,22.59,27.19,1.21,19,10.0,4.0
-IND,India,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,65.41,86.49,21.08,32.23,1.407,18,20.0,3.0
-JPN,Japan,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,101.28,110.66,9.38,9.26,0.444,19,7.0,10.0
-KOR,"Korea, Rep.",SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,99.17,105.16,5.99,6.04,0.294,17,11.0,13.0
-MEX,Mexico,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,84.97,84.72,-0.25,-0.29,-0.015,21,21.0,20.0
-NGA,Nigeria,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2019,41.77,63.56,21.79,52.17,2.234,17,24.0,2.0
-PER,Peru,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,92.57,108.03,15.46,16.7,0.775,18,8.0,7.0
-RUS,Russian Federation,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,105.29,99.59,-5.7,-5.41,-0.278,20,18.0,22.0
-SAU,Saudi Arabia,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,107.68,123.44,15.76,14.64,0.685,18,3.0,9.0
-SWE,Sweden,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,134.6,121.17,-13.43,-9.98,-0.524,19,4.0,23.0
-TUR,Turkiye,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,90.97,104.95,13.98,15.37,0.717,13,12.0,8.0
-USA,United States,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2000,2020,100.14,101.4,1.26,1.26,0.063,19,17.0,19.0
-ZAF,South Africa,SE.SEC.ENRR,Taxa de matrícula secundária (bruta %),2001,2020,99.39,102.4,3.01,3.03,0.157,16,16.0,16.0
-ARG,Argentina,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2001,2020,88.49,89.36,0.87,0.98,0.052,18,14.0,20.0
-BRA,Brazil,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,82.98,95.63,12.65,15.24,0.712,18,7.0,7.0
-CHL,Chile,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2001,2020,81.1,89.93,8.83,10.89,0.545,17,12.0,11.0
-CHN,China,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,76.41,86.6,10.19,13.34,0.628,18,15.0,8.0
-COL,Colombia,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2001,2020,74.32,89.5,15.18,20.43,0.983,19,13.0,5.0
-DEU,Germany,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,87.81,85.26,-2.55,-2.9,-0.147,16,17.0,22.0
-EGY,"Egypt, Arab Rep.",SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,76.26,83.1,6.84,8.97,0.43,19,18.0,12.0
-ETH,Ethiopia,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,28.26,43.03,14.77,52.26,2.125,18,24.0,1.0
-FIN,Finland,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,92.74,86.38,-6.36,-6.86,-0.355,11,16.0,23.0
-FRA,France,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,89.86,94.58,4.72,5.25,0.256,17,9.0,15.0
-GBR,United Kingdom,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,92.48,96.57,4.09,4.42,0.217,20,6.0,17.0
-IDN,Indonesia,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2019,71.89,80.35,8.46,11.77,0.587,19,19.0,10.0
-IND,India,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2018,51.88,65.79,13.91,26.81,1.328,16,22.0,3.0
-JPN,Japan,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,97.77,99.91,2.14,2.19,0.108,18,2.0,18.0
-KOR,"Korea, Rep.",SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,97.75,98.99,1.24,1.27,0.063,17,4.0,19.0
-MEX,Mexico,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,68.28,72.69,4.41,6.46,0.313,18,20.0,13.0
-NGA,Nigeria,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,35.61,49.47,13.86,38.92,1.657,20,23.0,2.0
-PER,Peru,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,80.14,100.0,19.86,24.78,1.113,18,1.0,4.0
-RUS,Russian Federation,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,93.19,92.31,-0.88,-0.94,-0.047,16,10.0,21.0
-SAU,Saudi Arabia,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2019,87.37,98.79,11.42,13.07,0.649,18,5.0,9.0
-SWE,Sweden,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2001,2020,94.21,99.27,5.06,5.37,0.276,18,3.0,14.0
-TUR,Turkiye,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,77.82,90.1,12.28,15.78,0.735,19,11.0,6.0
-USA,United States,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2001,2020,91.4,95.56,4.16,4.55,0.235,17,8.0,16.0
-ZAF,South Africa,SE.SEC.TENR,Taxa de matrícula secundária (líquida %),2000,2020,78.94,70.65,-8.29,-10.5,-0.553,19,21.0,24.0
-ARG,Argentina,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,79.43,81.14,1.71,2.15,0.107,18,7.0,18.0
-BRA,Brazil,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,49.13,76.8,27.67,56.32,2.259,20,9.0,7.0
-CHL,Chile,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,80.38,83.21,2.83,3.52,0.173,18,6.0,15.0
-CHN,China,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,49.38,73.68,24.3,49.21,2.021,19,10.0,8.0
-COL,Colombia,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2001,2020,50.77,57.13,6.36,12.53,0.623,17,18.0,12.0
-DEU,Germany,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2019,70.29,72.32,2.03,2.89,0.15,19,12.0,16.0
-EGY,"Egypt, Arab Rep.",SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,34.78,66.3,31.52,90.63,3.278,18,15.0,2.0
-ETH,Ethiopia,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2018,10.0,18.95,8.95,89.5,3.615,17,24.0,3.0
-FIN,Finland,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,87.87,92.15,4.28,4.87,0.238,20,2.0,14.0
-FRA,France,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2019,65.57,60.78,-4.79,-7.31,-0.398,19,17.0,23.0
-GBR,United Kingdom,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2001,2020,58.63,51.08,-7.55,-12.88,-0.723,17,19.0,24.0
-IDN,Indonesia,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,33.08,61.81,28.73,86.85,3.175,17,16.0,4.0
-IND,India,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,25.91,41.68,15.77,60.86,2.405,19,20.0,5.0
-JPN,Japan,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,62.66,71.98,9.32,14.87,0.696,19,13.0,11.0
-KOR,"Korea, Rep.",SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,94.5,94.23,-0.27,-0.29,-0.014,18,1.0,20.0
-MEX,Mexico,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,31.53,29.49,-2.04,-6.47,-0.334,19,23.0,22.0
-NGA,Nigeria,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2019,11.56,37.88,26.32,227.68,6.446,17,21.0,1.0
-PER,Peru,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,43.89,69.99,26.1,59.47,2.361,19,14.0,6.0
-RUS,Russian Federation,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,78.8,85.11,6.31,8.01,0.386,18,5.0,13.0
-SAU,Saudi Arabia,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2019,67.83,79.45,11.62,17.13,0.836,18,8.0,10.0
-SWE,Sweden,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,71.53,73.31,1.78,2.49,0.123,17,11.0,17.0
-TUR,Turkiye,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2001,2020,88.42,85.66,-2.76,-3.12,-0.167,17,4.0,21.0
-USA,United States,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,85.99,86.02,0.03,0.03,0.002,19,3.0,19.0
-ZAF,South Africa,SE.TER.ENRR,Taxa de matrícula terciária (bruta %),2000,2020,21.97,30.43,8.46,38.51,1.642,19,22.0,9.0
-ARG,Argentina,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.74,9.8,4.06,70.73,2.711,16,15.0,14.0
-BRA,Brazil,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2001,2020,8.25,12.0,3.75,45.45,1.992,19,1.0,18.0
-CHL,Chile,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2019,4.68,8.49,3.81,81.41,3.184,17,18.0,12.0
-CHN,China,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,4.82,12.0,7.18,148.96,4.666,18,1.0,5.0
-COL,Colombia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,4.94,11.89,6.95,140.69,4.49,20,13.0,7.0
-DEU,Germany,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.31,12.0,6.69,125.99,4.161,16,1.0,9.0
-EGY,"Egypt, Arab Rep.",SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.57,12.0,6.43,115.44,3.912,21,1.0,10.0
-ETH,Ethiopia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.14,12.0,6.86,133.46,4.33,19,1.0,8.0
-FIN,Finland,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,7.27,12.0,4.73,65.06,2.537,18,1.0,15.0
-FRA,France,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.53,8.62,3.09,55.88,2.244,18,17.0,17.0
-GBR,United Kingdom,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.34,3.8,-1.54,-28.84,-1.687,20,20.0,21.0
-IDN,Indonesia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2001,2020,4.31,12.0,7.69,178.42,5.537,16,1.0,3.0
-IND,India,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,4.57,12.0,7.43,162.58,4.945,18,1.0,4.0
-JPN,Japan,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,3.82,9.31,5.49,143.72,4.555,19,16.0,6.0
-KOR,"Korea, Rep.",SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,4.89,4.29,-0.6,-12.27,-0.652,18,19.0,19.0
-MEX,Mexico,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2002,2020,4.46,3.01,-1.45,-32.51,-2.161,18,22.0,22.0
-NGA,Nigeria,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,3.59,12.0,8.41,234.26,6.22,21,1.0,1.0
-PER,Peru,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,4.12,12.0,7.88,191.26,5.491,16,1.0,2.0
-RUS,Russian Federation,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,4.09,3.41,-0.68,-16.63,-0.905,19,21.0,20.0
-SAU,Saudi Arabia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.68,2.49,-3.19,-56.16,-4.039,20,23.0,23.0
-SWE,Sweden,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2018,7.52,12.0,4.48,59.57,2.63,16,1.0,16.0
-TUR,Turkiye,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,4.19,1.78,-2.41,-57.52,-4.19,21,24.0,24.0
-USA,United States,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,5.18,10.31,5.13,99.03,3.501,19,14.0,11.0
-ZAF,South Africa,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2000,2020,6.65,12.0,5.35,80.45,2.995,20,1.0,13.0
+ARG,Argentina,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,3.86,5.2769,1.4169,36.71,2.106,16,10.0,3.0
+BRA,Brazil,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,4.4791,5.7715,1.2924,28.85,1.704,16,4.0,7.0
+CHL,Chile,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,3.2802,5.6299,2.3498,71.64,3.667,15,6.0,1.0
+COL,Colombia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,4.021,5.2617,1.2407,30.85,1.809,16,11.0,6.0
+DEU,Germany,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2008,2020,4.4734,5.516,1.0426,23.31,1.761,12,7.0,8.0
+EGY,"Egypt, Arab Rep.",SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2008,4.7944,3.7608,-1.0336,-21.56,-7.775,4,20.0,20.0
+ETH,Ethiopia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2006,2020,5.4909,4.0906,-1.4004,-25.5,-2.081,15,17.0,21.0
+FIN,Finland,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,6.0258,6.6813,0.6555,10.88,0.691,16,2.0,10.0
+FRA,France,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2017,2020,5.4648,5.6587,0.1939,3.55,1.169,4,5.0,15.0
+GBR,United Kingdom,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,4.9298,5.4394,0.5096,10.34,0.658,15,8.0,11.0
+IDN,Indonesia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,2.8728,1.0159,-1.8569,-64.64,-6.695,15,22.0,23.0
+IND,India,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,3.1888,4.2934,1.1046,34.64,2.003,14,15.0,5.0
+JPN,Japan,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,3.3149,3.3063,-0.0087,-0.26,-0.017,15,21.0,16.0
+KOR,"Korea, Rep.",SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2015,2020,4.2425,4.5271,0.2846,6.71,1.307,6,13.0,13.0
+MEX,Mexico,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,4.634,4.4997,-0.1343,-2.9,-0.196,15,14.0,17.0
+NGA,Nigeria,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2012,2020,0.5492,0.3596,-0.1896,-34.52,-5.155,9,23.0,22.0
+PER,Peru,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,2.839,4.2594,1.4203,50.03,2.741,16,16.0,2.0
+RUS,Russian Federation,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,3.7719,4.0164,0.2445,6.48,0.42,14,19.0,14.0
+SAU,Saudi Arabia,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2008,5.4309,5.1378,-0.2931,-5.4,-1.832,3,12.0,19.0
+SWE,Sweden,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,6.5152,7.9533,1.4382,22.07,1.339,16,1.0,9.0
+TUR,Turkiye,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2011,2020,4.2215,4.0338,-0.1877,-4.45,-0.504,10,18.0,18.0
+USA,United States,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2015,2020,4.9306,5.3953,0.4647,9.42,1.818,6,9.0,12.0
+ZAF,South Africa,SE.XPD.TOTL.GD.ZS,Gasto público em educação (% PIB),2005,2020,4.5245,6.1707,1.6462,36.38,2.09,16,3.0,4.0

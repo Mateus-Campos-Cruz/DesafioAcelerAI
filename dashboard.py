@@ -92,7 +92,7 @@ def _pipeline_thread(api_key: str, params: dict):
 def _build_analise_data(params: dict) -> list:
     """Lê o analise_final.csv (gerado pelo pipeline.py local) e monta os registros
     no formato esperado pelo nó 'Preparar Dados e Prompt' do n8n, filtrando pelos
-    países/indicadores selecionados na sidebar (se houver seleção)."""
+    países/indicadores selecionados nos Filtros (se houver seleção)."""
     csv_path = OUTPUT_DIR / "analise_final.csv"
     if not csv_path.exists():
         return []
@@ -367,7 +367,7 @@ df_comparative = load_artifact("comparativo_paises.csv")
 df_historico = load_artifact("historico.csv")
 analysis = load_artifact("relatorio.json")
 
-# Aplica a seleção de países/indicadores da sidebar às tabelas e gráficos exibidos
+# Aplica a seleção de países/indicadores dos Filtros às tabelas e gráficos exibidos
 # (mesma convenção usada no payload enviado ao Claude: seleção vazia = mostra tudo).
 if df_growth is not None and selected_countries:
     df_growth = df_growth[df_growth["Country Code"].isin(selected_countries)]

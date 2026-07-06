@@ -15,7 +15,7 @@ OUTPUT_DIR = Path(__file__).parent / "outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 MODEL = "claude-sonnet-4-6"
-MAX_TOKENS = 4096
+MAX_TOKENS = 8192
 
 # Tool definition para saída estruturada garantida
 ANALYSIS_TOOL = {

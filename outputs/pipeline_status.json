@@ -1,8 +1,15 @@
 {
-  "stage": "error",
-  "stage_label": "Erro no webhook: Expecting value: line 1 column 1 (char 0)",
-  "progress_pct": 0,
-  "updated_at": "2026-07-04 20:29:40",
-  "error": "Traceback (most recent call last):\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\requests\\models.py\", line 1116, in json\n    return complexjson.loads(self.text, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\json\\__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\json\\decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\json\\decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Mateus\\Desafio Acelerai Kaggle\\dashboard.py\", line 96, in _webhook_thread\n    result = resp.json()\n             ^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\requests\\models.py\", line 1120, in json\n    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)\nrequests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n",
-  "outputs": {}
+  "stage": "done",
+  "stage_label": "Análise via n8n concluída com sucesso.",
+  "progress_pct": 100,
+  "updated_at": "2026-07-06 20:44:34",
+  "error": null,
+  "outputs": {
+    "analise_final.csv": "C:\\Mateus\\Desafio Acelerai Kaggle\\outputs\\analise_final.csv",
+    "comparativo_paises.csv": "C:\\Mateus\\Desafio Acelerai Kaggle\\outputs\\comparativo_paises.csv",
+    "historico.csv": "C:\\Mateus\\Desafio Acelerai Kaggle\\outputs\\historico.csv",
+    "relatorio.json": "C:\\Mateus\\Desafio Acelerai Kaggle\\outputs\\relatorio.json",
+    "relatorio.md": "C:\\Mateus\\Desafio Acelerai Kaggle\\outputs\\relatorio.md",
+    "relatorio.pdf": "C:\\Mateus\\Desafio Acelerai Kaggle\\outputs\\relatorio.pdf"
+  }
 }
