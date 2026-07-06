@@ -16,7 +16,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from fetch_worldbank import COUNTRY_NAMES
-from pipeline import INDICATORS_PRIORITY
+from pipeline import INDICATORS_PRIORITY, YEAR_END, YEAR_START
 
 load_dotenv()
 
@@ -269,7 +269,7 @@ st.divider()
 # ─── Filtros ─────────────────────────────────────────────────────────────────
 
 st.subheader("🔎 Filtros")
-col_f1, col_f2 = st.columns(2)
+col_f1, col_f2, col_f3 = st.columns(3)
 with col_f1:
     all_countries = list(COUNTRY_NAMES.keys())
     selected_countries = st.multiselect(
@@ -289,6 +289,9 @@ with col_f2:
     selected_indicators = st.multiselect("Indicadores", list(indicators_map.keys()),
                                           default=list(indicators_map.keys())[:4],
                                           format_func=lambda x: indicators_map[x])
+with col_f3:
+    selected_period = st.slider("Período", min_value=YEAR_START, max_value=YEAR_END,
+                                 value=(YEAR_START, YEAR_END))
 st.divider()
 
 
@@ -372,6 +375,8 @@ if df_comparative is not None and selected_countries:
     df_comparative = df_comparative[df_comparative["Country Code"].isin(selected_countries)]
 if df_historico is not None and selected_countries:
     df_historico = df_historico[df_historico["Country Code"].isin(selected_countries)]
+if df_historico is not None:
+    df_historico = df_historico[df_historico["Ano"].between(*selected_period)]
 
 has_data = df_growth is not None or analysis is not None
 
@@ -437,30 +442,42 @@ else:
             sel2 = st.selectbox("Indicador para gráficos", ind_opts2, key="g_ind",
                                  format_func=lambda x: df_growth[df_growth["Indicator Code"] == x]["Indicador Label"].iloc[0]
                                  if "Indicador Label" in df_growth.columns else x)
+            sel2_label = (df_growth[df_growth["Indicator Code"] == sel2]["Indicador Label"].iloc[0]
+                          if "Indicador Label" in df_growth.columns else sel2)
 
             # Barras: crescimento %
             df_bar = df_growth[df_growth["Indicator Code"] == sel2].dropna(subset=["Crescimento %"])
             df_bar = df_bar.sort_values("Crescimento %", ascending=True)
             if len(df_bar):
-                fig = px.bar(df_bar, x="Crescimento %", y="Country Code", orientation="h",
+                ano_i, ano_f = int(df_bar["Ano Inicio"].min()), int(df_bar["Ano Fim"].max())
+                st.markdown(f"**Crescimento por país — {sel2_label}**")
+                st.caption(f"Variação percentual do indicador entre {ano_i} e {ano_f}, do menor para o maior país.")
+                fig = px.bar(df_bar, x="Crescimento %", y="Country Name", orientation="h",
                              color="Crescimento %", color_continuous_scale="RdYlGn",
-                             title=f"Crescimento % — {sel2}", height=480)
+                             labels={"Crescimento %": "Crescimento (%)", "Country Name": "País"},
+                             height=480)
                 st.plotly_chart(fig, use_container_width=True)
 
             # Linha: série histórica
             if df_historico is not None:
                 df_hist = df_historico[df_historico["Indicator Code"] == sel2].dropna(subset=["Valor"])
                 if len(df_hist):
-                    fig2 = px.line(df_hist, x="Ano", y="Valor", color="Country Code",
-                                   title=f"Evolução histórica — {sel2}", height=400)
+                    st.markdown(f"**Evolução histórica — {sel2_label}**")
+                    st.caption(f"Valor do indicador ano a ano ({selected_period[0]}–{selected_period[1]}), "
+                               "uma linha por país selecionado.")
+                    fig2 = px.line(df_hist, x="Ano", y="Valor", color="Country Name",
+                                   labels={"Valor": sel2_label, "Country Name": "País"}, height=400)
                     st.plotly_chart(fig2, use_container_width=True)
 
             # Heatmap CAGR
-            st.subheader("Heatmap CAGR % — todos indicadores")
-            df_heat = df_growth.pivot_table(index="Country Code", columns="Indicator Code", values="CAGR %")
+            st.markdown("**Heatmap de CAGR — todos os indicadores selecionados**")
+            st.caption("CAGR (Crescimento Anual Composto) resume, em uma taxa anual só, o quanto cada indicador "
+                       "cresceu por país — verde indica crescimento mais forte, vermelho indica estagnação ou queda.")
+            df_heat = df_growth.pivot_table(index="Country Name", columns="Indicador Label", values="CAGR %")
+            df_heat = df_heat.rename_axis(index="País", columns="Indicador")
             if not df_heat.empty:
                 fig3 = px.imshow(df_heat, color_continuous_scale="RdYlGn",
-                                  title="CAGR Anual Composto (%)", aspect="auto", height=500)
+                                  labels={"color": "CAGR (%)"}, aspect="auto", height=500)
                 st.plotly_chart(fig3, use_container_width=True)
         else:
             st.info("Execute a análise para ver os gráficos.")
