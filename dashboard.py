@@ -337,6 +337,8 @@ with col_progress:
     for s_key, s_label in STAGES:
         if stage == "error":
             cls = "chip-error"
+        elif stage == "done":
+            cls = "chip-done"
         elif s_key == stage:
             cls = "chip-active"
             reached = True
