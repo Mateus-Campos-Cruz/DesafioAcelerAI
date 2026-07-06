@@ -1,0 +1,8 @@
+{
+  "stage": "error",
+  "stage_label": "Erro no webhook: Expecting value: line 1 column 1 (char 0)",
+  "progress_pct": 0,
+  "updated_at": "2026-07-04 20:29:40",
+  "error": "Traceback (most recent call last):\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\requests\\models.py\", line 1116, in json\n    return complexjson.loads(self.text, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\json\\__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\json\\decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\json\\decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Mateus\\Desafio Acelerai Kaggle\\dashboard.py\", line 96, in _webhook_thread\n    result = resp.json()\n             ^^^^^^^^^^^\n  File \"C:\\Users\\lilmu\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\requests\\models.py\", line 1120, in json\n    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)\nrequests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n",
+  "outputs": {}
+}

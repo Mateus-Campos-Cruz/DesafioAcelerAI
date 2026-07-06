@@ -1,0 +1,149 @@
+{
+  "name": "Educação Global — Acelera AI Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "executar-analise",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd \"{{$env.PROJECT_DIR}}\" && python pipeline.py"
+      },
+      "id": "run-pipeline",
+      "name": "Executar Pipeline Python",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "notes": "Roda o pipeline Python (ingestão + limpeza + analytics). PROJECT_DIR deve apontar para o diretório do projeto."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.exitCode}}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "check-exit-code",
+      "name": "Pipeline OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd \"{{$env.PROJECT_DIR}}\" && python claude_agent.py"
+      },
+      "id": "run-claude-agent",
+      "name": "Executar Claude Agent",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [900, 200],
+      "notes": "Roda o agente Claude: lê analise_final.csv, chama Anthropic API, gera relatorio.json + relatorio.md + relatorio.pdf"
+    },
+    {
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
+        "requestMethod": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"model\": \"claude-sonnet-4-6\",\n  \"max_tokens\": 4096,\n  \"system\": \"Você é um agente especializado em inteligência analítica sobre indicadores educacionais globais. Seu objetivo é transformar dados quantitativos em análise executiva e recomendações.\",\n  \"tools\": [{{$env.ANALYSIS_TOOL_JSON}}],\n  \"tool_choice\": {\"type\": \"tool\", \"name\": \"registrar_analise_educacional\"},\n  \"messages\": [{\"role\": \"user\", \"content\": \"{{$json.prompt}}\"}]\n}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "claude-api-call",
+      "name": "Chamar Anthropic API (alternativo)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [900, 400],
+      "notes": "Alternativa: chamar a API da Anthropic diretamente via HTTP Request no n8n (sem rodar claude_agent.py). Use se preferir não executar script Python separado para o Claude."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'success', message: 'Pipeline e análise Claude concluídos', outputs: { analise_final_csv: $env.PROJECT_DIR + '/outputs/analise_final.csv', relatorio_json: $env.PROJECT_DIR + '/outputs/relatorio.json', relatorio_md: $env.PROJECT_DIR + '/outputs/relatorio.md', relatorio_pdf: $env.PROJECT_DIR + '/outputs/relatorio.pdf' } }) }}",
+        "options": {
+          "responseHeaders": {
+            "values": [
+              {"name": "Content-Type", "value": "application/json"}
+            ]
+          }
+        }
+      },
+      "id": "respond-success",
+      "name": "Responder Sucesso",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'error', message: 'Falha no pipeline Python', detail: $json.stderr }) }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "respond-error",
+      "name": "Responder Erro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 520]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [{"node": "Executar Pipeline Python", "type": "main", "index": 0}]
+      ]
+    },
+    "Executar Pipeline Python": {
+      "main": [
+        [{"node": "Pipeline OK?", "type": "main", "index": 0}]
+      ]
+    },
+    "Pipeline OK?": {
+      "main": [
+        [{"node": "Executar Claude Agent", "type": "main", "index": 0}],
+        [{"node": "Responder Erro", "type": "main", "index": 0}]
+      ]
+    },
+    "Executar Claude Agent": {
+      "main": [
+        [{"node": "Responder Sucesso", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "_instructions": {
+    "variables_to_set": {
+      "PROJECT_DIR": "Caminho absoluto para o diretório do projeto (ex: C:/Mateus/Desafio Acelerai Kaggle)",
+      "ANTHROPIC_API_KEY": "Sua chave da API Anthropic (armazenar como credencial n8n, não variável de ambiente)"
+    },
+    "setup_steps": [
+      "1. Importe este JSON no n8n via Menu > Workflows > Import from File",
+      "2. Configure PROJECT_DIR nas variáveis de ambiente do n8n",
+      "3. Adicione a credencial Anthropic API Key no n8n (Credentials > New > Anthropic API)",
+      "4. Ative o workflow",
+      "5. Copie a URL do Webhook gerada e cole no .env do projeto como WEBHOOK_URL",
+      "6. Se rodar n8n localmente sem domínio público, use ngrok para expor o webhook: ngrok http 5678"
+    ]
+  }
+}

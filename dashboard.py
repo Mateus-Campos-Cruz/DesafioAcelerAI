@@ -1,0 +1,441 @@
+"""
+Interface Agent — Streamlit Dashboard
+Macroprocesso 5: Interface de Controle e Visualização
+Executa o pipeline completo em background thread, com progresso em tempo real.
+"""
+import json
+import os
+import threading
+import time
+from pathlib import Path
+
+import plotly.express as px
+import requests
+import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OUTPUT_DIR = Path(__file__).parent / "outputs"
+OUTPUT_DIR.mkdir(exist_ok=True)
+STATUS_FILE = OUTPUT_DIR / "pipeline_status.json"
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL", "")
+
+st.set_page_config(
+    page_title="Educação Global — Acelera AI",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown("""
+<style>
+  .main-title { font-size: 2.2rem; font-weight: 700; color: #1a4a7a; margin-bottom: 0; }
+  .subtitle { color: #666; font-size: 0.95rem; margin-bottom: 1rem; }
+  .stage-chip {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 0.82rem; font-weight: 600; margin: 2px;
+  }
+  .chip-done { background:#d4edda; color:#155724; }
+  .chip-active { background:#fff3cd; color:#856404; }
+  .chip-pending { background:#e2e3e5; color:#383d41; }
+  .chip-error { background:#f8d7da; color:#721c24; }
+</style>
+""", unsafe_allow_html=True)
+
+
+# ─── Helpers de estado e status ──────────────────────────────────────────────
+
+def read_status() -> dict:
+    if STATUS_FILE.exists():
+        try:
+            return json.loads(STATUS_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"stage": "idle", "stage_label": "Aguardando", "progress_pct": 0, "error": None, "outputs": {}}
+
+
+def load_artifact(name: str):
+    """Lê um artefato do diretório de outputs."""
+    import pandas as pd
+    path = OUTPUT_DIR / name
+    if not path.exists():
+        return None
+    if name.endswith(".csv"):
+        return pd.read_csv(path, encoding="utf-8-sig")
+    if name.endswith(".json"):
+        return json.loads(path.read_text(encoding="utf-8"))
+    if name.endswith(".md"):
+        return path.read_text(encoding="utf-8")
+    return path.read_bytes()
+
+
+# ─── Execução em background thread ───────────────────────────────────────────
+
+def _pipeline_thread(api_key: str, params: dict):
+    """Roda o pipeline completo em thread separada."""
+    try:
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent))
+        from run_all import run_full_pipeline
+        run_full_pipeline(api_key=api_key)
+    except Exception as exc:
+        import traceback
+        from run_all import write_status
+        write_status("error", f"Erro: {exc}", 0, error=traceback.format_exc())
+
+
+def _webhook_thread(params: dict):
+    """Dispara o webhook n8n e salva artefatos de saída."""
+    from run_all import write_status
+    try:
+        write_status("fetching", "Enviando para n8n — aguardando Claude...", 20)
+        resp = requests.post(WEBHOOK_URL, json=params, timeout=300,
+                             headers={"Content-Type": "application/json"})
+        # Capturar texto bruto antes de tentar parsear
+        raw_text = resp.text
+        if resp.status_code != 200:
+            write_status("error", f"n8n retornou HTTP {resp.status_code}", 0,
+                         error=f"Status: {resp.status_code}\nBody: {raw_text[:800]}")
+            return
+
+        try:
+            result = resp.json()
+        except Exception as json_err:
+            write_status("error", f"Resposta n8n não é JSON: {json_err}", 0,
+                         error=f"Resposta recebida ({len(raw_text)} chars):\n{raw_text[:800]}")
+            return
+
+        write_status("analyzing", "Processando resposta do Claude...", 80)
+        analysis = result.get("analysis")
+        if result.get("status") == "success" and analysis:
+            # Salvar JSON do Claude
+            (OUTPUT_DIR / "relatorio.json").write_text(
+                json.dumps(analysis, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            # Salvar Markdown simples
+            md_lines = [
+                "# Relatório Executivo — Inteligência Educacional Global\n",
+                f"**Sumário:** {analysis.get('sumario_executivo', '')}\n",
+                "\n## Países em Evolução\n",
+            ]
+            for p in analysis.get("paises_em_evolucao", []):
+                md_lines.append(f"- **{p.get('pais')}**: {p.get('indicador')} — {p.get('taxa_crescimento')}\n")
+            md_lines.append("\n## Recomendações\n")
+            for r in analysis.get("recomendacoes", []):
+                md_lines.append(f"- [{r.get('prioridade','').upper()}] {r.get('recomendacao')}\n")
+            (OUTPUT_DIR / "relatorio.md").write_text("".join(md_lines), encoding="utf-8")
+
+            outputs = {
+                "relatorio.json": str(OUTPUT_DIR / "relatorio.json"),
+                "relatorio.md": str(OUTPUT_DIR / "relatorio.md"),
+            }
+            write_status("done", "Análise via n8n concluída com sucesso.", 100, outputs=outputs)
+        else:
+            err = result.get("error", "Resposta inesperada do n8n")
+            write_status("error", f"Erro Claude: {err}", 0, error=err)
+
+    except Exception as exc:
+        import traceback
+        write_status("error", f"Erro no webhook: {exc}", 0, error=traceback.format_exc())
+
+
+def start_execution(params: dict):
+    """Inicia a execução em background e retorna imediatamente."""
+    # Escrever status inicial imediatamente para o UI reagir
+    STATUS_FILE.write_text(json.dumps(
+        {"stage": "starting", "stage_label": "Iniciando...", "progress_pct": 1,
+         "updated_at": "", "error": None, "outputs": {}},
+        ensure_ascii=False
+    ), encoding="utf-8")
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if WEBHOOK_URL:
+        t = threading.Thread(target=_webhook_thread, args=(params,), daemon=True)
+    else:
+        t = threading.Thread(target=_pipeline_thread, args=(api_key, params), daemon=True)
+    t.start()
+
+
+# ─── Sidebar ─────────────────────────────────────────────────────────────────
+
+with st.sidebar:
+    st.markdown("### ⚙️ Configurações")
+
+    mode = "n8n Webhook" if WEBHOOK_URL else "Local (sem n8n)"
+    st.info(f"Modo: **{mode}**")
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if api_key:
+        st.success("Anthropic API: ✓ configurada")
+    else:
+        st.warning("Anthropic API: não configurada\nDefina ANTHROPIC_API_KEY no `.env`")
+
+    st.markdown("---")
+    st.markdown("**Filtros opcionais**")
+
+    all_countries = ["BRA","USA","CHN","IND","DEU","FRA","GBR","JPN",
+                     "KOR","MEX","ARG","COL","ZAF","NGA","ETH","EGY",
+                     "IDN","TUR","SAU","RUS","CHL","PER","FIN","SWE"]
+    selected_countries = st.multiselect("Países", all_countries,
+                                        default=["BRA","USA","CHN","IND","DEU","KOR","ZAF"])
+
+    indicators_map = {
+        "SE.XPD.TOTL.GD.ZS": "Gasto em educação (% PIB)",
+        "SE.PRM.ENRR": "Matrícula primária",
+        "SE.SEC.ENRR": "Matrícula secundária",
+        "SE.TER.ENRR": "Matrícula terciária",
+        "SE.PRM.CMPT.ZS": "Conclusão primária",
+        "SE.ADT.LITR.ZS": "Alfabetização adultos",
+    }
+    selected_indicators = st.multiselect("Indicadores", list(indicators_map.keys()),
+                                          default=list(indicators_map.keys())[:4],
+                                          format_func=lambda x: indicators_map[x])
+
+    st.markdown("---")
+    st.caption("Dados: World Bank EdStats\nIA: Claude claude-sonnet-4-6\nOrq: n8n")
+
+
+# ─── Header ──────────────────────────────────────────────────────────────────
+
+st.markdown('<div class="main-title">🎓 Inteligência Educacional Global</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Desafio Acelera AI · World Bank EdStats · Claude + n8n + Streamlit</div>',
+            unsafe_allow_html=True)
+st.divider()
+
+
+# ─── Painel de controle + progresso ──────────────────────────────────────────
+
+status = read_status()
+is_running = status["stage"] not in ("idle", "done", "error")
+is_done = status["stage"] == "done"
+
+col_btn, col_progress = st.columns([2, 5])
+
+with col_btn:
+    if st.button(
+        "⏳ Executando..." if is_running else "🚀 Executar Análise",
+        type="primary",
+        disabled=is_running,
+        use_container_width=True,
+    ):
+        start_execution({"countries": selected_countries, "indicators": selected_indicators})
+        st.rerun()
+
+    if is_done and st.button("🔄 Nova Análise", use_container_width=True):
+        STATUS_FILE.unlink(missing_ok=True)
+        st.rerun()
+
+with col_progress:
+    pct = status.get("progress_pct", 0)
+    label = status.get("stage_label", "")
+    stage = status.get("stage", "idle")
+
+    STAGES = [
+        ("fetching",    "1. Coleta"),
+        ("processing",  "2. Tratamento"),
+        ("analyzing",   "3. IA Claude"),
+        ("reporting",   "4. Relatório"),
+        ("done",        "Concluído"),
+    ]
+
+    # Chips de estágio
+    chips_html = ""
+    active_stages = [s[0] for s in STAGES]
+    reached = False
+    for s_key, s_label in STAGES:
+        if stage == "error":
+            cls = "chip-error"
+        elif s_key == stage:
+            cls = "chip-active"
+            reached = True
+        elif not reached:
+            cls = "chip-done"
+        else:
+            cls = "chip-pending"
+        chips_html += f'<span class="stage-chip {cls}">{s_label}</span>'
+
+    st.markdown(chips_html, unsafe_allow_html=True)
+    st.progress(pct / 100, text=label if label else "Aguardando execução")
+
+    if stage == "error":
+        st.error(f"Erro: {status.get('error', '')[:300]}")
+
+# Auto-refresh enquanto rodando
+if is_running:
+    time.sleep(2)
+    st.rerun()
+
+st.divider()
+
+
+# ─── Resultados ──────────────────────────────────────────────────────────────
+
+df_growth = load_artifact("analise_final.csv")
+df_comparative = load_artifact("comparativo_paises.csv")
+df_historico = load_artifact("historico.csv")
+analysis = load_artifact("relatorio.json")
+
+has_data = df_growth is not None or analysis is not None
+
+if not has_data:
+    st.info("""
+**Como usar:**
+1. Clique em **Executar Análise** — o sistema coleta dados automaticamente do World Bank API
+2. Aguarde o pipeline processar os dados (2–5 min dependendo da conexão)
+3. A análise executiva é gerada via **Claude** com saída estruturada
+4. Visualize tabelas, gráficos e relatório — e baixe todos os artefatos
+
+> **Opcional:** coloque os CSVs do Kaggle (EdStatsData.csv, EdStatsCountry.csv, EdStatsSeries.csv)
+> na pasta `data/` para usar dados completos ao invés da API.
+""")
+else:
+    # Métricas
+    if df_growth is not None:
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Países", df_growth["Country Code"].nunique())
+        c2.metric("Indicadores", df_growth["Indicator Code"].nunique())
+        anos = f"{int(df_growth['Ano Inicio'].min())}–{int(df_growth['Ano Fim'].max())}" if len(df_growth) else "—"
+        c3.metric("Período", anos)
+        c4.metric("Registros", f"{len(df_growth):,}")
+        st.divider()
+
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Rankings", "📈 Gráficos", "🤖 Relatório Claude", "⬇️ Downloads"])
+
+    # ── Tab 1: Rankings ───────────────────────────────────────────────────
+    with tab1:
+        if df_growth is not None and len(df_growth) > 0:
+            st.subheader("Rankings por Indicador")
+            ind_opts = df_growth["Indicator Code"].unique().tolist()
+            sel = st.selectbox("Indicador", ind_opts,
+                                format_func=lambda x: df_growth[df_growth["Indicator Code"] == x]["Indicador Label"].iloc[0]
+                                if "Indicador Label" in df_growth.columns else x)
+            df_sel = df_growth[df_growth["Indicator Code"] == sel].sort_values("Crescimento %", ascending=False)
+            show_cols = [c for c in ["Country Name","Country Code","Valor Inicio","Valor Fim",
+                                      "Crescimento %","CAGR %","Rank Valor Atual","Rank Crescimento %"]
+                         if c in df_sel.columns]
+            st.dataframe(df_sel[show_cols], use_container_width=True, height=400)
+
+            if df_comparative is not None:
+                st.subheader("Comparativo entre Países")
+                st.dataframe(df_comparative, use_container_width=True, height=300)
+        else:
+            st.info("Dados não disponíveis — execute a análise.")
+
+    # ── Tab 2: Gráficos ───────────────────────────────────────────────────
+    with tab2:
+        if df_growth is not None and len(df_growth) > 0:
+            ind_opts2 = df_growth["Indicator Code"].unique().tolist()
+            sel2 = st.selectbox("Indicador para gráficos", ind_opts2, key="g_ind",
+                                 format_func=lambda x: df_growth[df_growth["Indicator Code"] == x]["Indicador Label"].iloc[0]
+                                 if "Indicador Label" in df_growth.columns else x)
+
+            # Barras: crescimento %
+            df_bar = df_growth[df_growth["Indicator Code"] == sel2].dropna(subset=["Crescimento %"])
+            df_bar = df_bar.sort_values("Crescimento %", ascending=True)
+            if len(df_bar):
+                fig = px.bar(df_bar, x="Crescimento %", y="Country Code", orientation="h",
+                             color="Crescimento %", color_continuous_scale="RdYlGn",
+                             title=f"Crescimento % — {sel2}", height=480)
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Linha: série histórica
+            if df_historico is not None:
+                df_hist = df_historico[df_historico["Indicator Code"] == sel2].dropna(subset=["Valor"])
+                if len(df_hist):
+                    fig2 = px.line(df_hist, x="Ano", y="Valor", color="Country Code",
+                                   title=f"Evolução histórica — {sel2}", height=400)
+                    st.plotly_chart(fig2, use_container_width=True)
+
+            # Heatmap CAGR
+            st.subheader("Heatmap CAGR % — todos indicadores")
+            df_heat = df_growth.pivot_table(index="Country Code", columns="Indicator Code", values="CAGR %")
+            if not df_heat.empty:
+                fig3 = px.imshow(df_heat, color_continuous_scale="RdYlGn",
+                                  title="CAGR Anual Composto (%)", aspect="auto", height=500)
+                st.plotly_chart(fig3, use_container_width=True)
+        else:
+            st.info("Execute a análise para ver os gráficos.")
+
+    # ── Tab 3: Relatório Claude ───────────────────────────────────────────
+    with tab3:
+        if analysis:
+            st.info(analysis.get("sumario_executivo", ""))
+            col_l, col_r = st.columns(2)
+
+            with col_l:
+                with st.expander("🚀 Países em Evolução", expanded=True):
+                    for p in analysis.get("paises_em_evolucao", []):
+                        st.markdown(f"**{p.get('pais','')}** — {p.get('indicador','')}  \n"
+                                    f"`{p.get('taxa_crescimento','')}` {p.get('destaque','')}")
+                        st.divider()
+                with st.expander("📉 Países Estagnados"):
+                    for p in analysis.get("paises_estagnados", []):
+                        st.markdown(f"**{p.get('pais','')}** — {p.get('indicador','')}  \n"
+                                    f"Período: `{p.get('periodo_observado','')}` {p.get('observacao','')}")
+                        st.divider()
+
+            with col_r:
+                with st.expander("💰 Maior Investimento", expanded=True):
+                    for p in analysis.get("maior_investimento", []):
+                        st.markdown(f"**{p.get('pais','')}** — {p.get('valor_percentual','')}  \n"
+                                    f"{p.get('relacao_desempenho','')}")
+                        st.divider()
+                with st.expander("🏆 Melhores Indicadores Gerais"):
+                    for p in analysis.get("melhores_indicadores", []):
+                        st.markdown(f"**{p.get('pais','')}** — {p.get('justificativa','')}")
+                        for ind in p.get("indicadores_destaque", []):
+                            st.markdown(f"  - {ind}")
+                        st.divider()
+
+            with st.expander("💡 Hipóteses Explicativas"):
+                for h in analysis.get("explicacoes", []):
+                    badge = {"alto":"🟢","médio":"🟡","baixo":"🔴"}.get(h.get("nivel_confianca",""),"⚪")
+                    st.markdown(f"{badge} **[Hipótese — confiança {h.get('nivel_confianca','')}]**  \n"
+                                f"{h.get('hipotese','')}  \n*Evidência: {h.get('evidencia','')}*")
+                    st.divider()
+
+            with st.expander("📋 Recomendações para Gestores"):
+                for r in analysis.get("recomendacoes", []):
+                    badge = {"alta":"🔴","média":"🟡","baixa":"🟢"}.get(r.get("prioridade",""),"⚪")
+                    st.markdown(f"{badge} **[{r.get('prioridade','').upper()}]** {r.get('recomendacao','')}  \n"
+                                f"*Público-alvo: {r.get('publico_alvo','')}*")
+                    st.divider()
+        else:
+            relatorio_md = load_artifact("relatorio.md")
+            if relatorio_md:
+                st.markdown(relatorio_md)
+            else:
+                st.info("Execute a análise para ver o relatório gerado pelo Claude.")
+
+    # ── Tab 4: Downloads ──────────────────────────────────────────────────
+    with tab4:
+        st.subheader("Download dos Artefatos")
+
+        def dl_btn(label: str, fname: str, mime: str):
+            path = OUTPUT_DIR / fname
+            if path.exists():
+                st.download_button(f"⬇️ {label}", path.read_bytes(), fname, mime,
+                                   use_container_width=True)
+            else:
+                st.button(f"🔒 {label} (não gerado)", disabled=True, use_container_width=True)
+
+        c1, c2, c3 = st.columns(3)
+        with c1: dl_btn("analise_final.csv", "analise_final.csv", "text/csv")
+        with c2: dl_btn("Relatório Markdown", "relatorio.md", "text/markdown")
+        with c3: dl_btn("Relatório PDF", "relatorio.pdf", "application/pdf")
+
+        c4, c5, c6 = st.columns(3)
+        with c4: dl_btn("comparativo_paises.csv", "comparativo_paises.csv", "text/csv")
+        with c5: dl_btn("historico.csv", "historico.csv", "text/csv")
+        with c6:
+            if analysis:
+                st.download_button("⬇️ relatorio.json", json.dumps(analysis, ensure_ascii=False, indent=2),
+                                   "relatorio.json", "application/json", use_container_width=True)
+            else:
+                st.button("🔒 relatorio.json (não gerado)", disabled=True, use_container_width=True)
+
+
+# ─── Footer ──────────────────────────────────────────────────────────────────
+st.divider()
+st.caption("🤖 Agente de Inteligência Global em Educação · Desafio Acelera AI · Claude + n8n + Streamlit")
