@@ -262,8 +262,6 @@ def start_execution(params: dict):
 # ─── Header ──────────────────────────────────────────────────────────────────
 
 st.markdown('<div class="main-title">🎓 Inteligência Educacional Global</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Desafio Acelera AI · World Bank EdStats · Claude + n8n + Streamlit</div>',
-            unsafe_allow_html=True)
 st.caption("Fonte dos dados: World Bank EdStats")
 st.divider()
 
