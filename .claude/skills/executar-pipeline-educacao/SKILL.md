@@ -7,7 +7,7 @@ Este projeto (Desafio Acelera AI — Agente de Inteligência Global em Educaçã
 
 Quando esta skill for invocada, execute o pipeline completo e reporte o resultado ao usuário:
 
-1. Confirme que `ANTHROPIC_API_KEY` está configurada em `.env` (necessária tanto no modo local quanto para a credencial Anthropic usada pelo n8n). Se não estiver, avise o usuário e pare.
+1. Verifique o modo de execução em `.env`: se `WEBHOOK_URL` estiver configurada, a análise via Claude roda pelo n8n (a API key da Anthropic fica na credencial do próprio n8n, não em `.env`). Se `WEBHOOK_URL` não estiver configurada, o modo é 100% local e `ANTHROPIC_API_KEY` precisa estar em `.env` — se estiver ausente nesse caso, avise o usuário e pare.
 2. Rode o orquestrador ponta a ponta:
    ```
    python run_all.py
