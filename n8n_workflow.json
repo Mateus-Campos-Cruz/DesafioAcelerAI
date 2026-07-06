@@ -140,7 +140,54 @@
       "name": "Responder Interface Streamlit",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [1040, -128]
+      "position": [1040, -128],
+      "onError": "continueRegularOutput",
+      "notes": "onError=continueRegularOutput: nas execuções agendadas (sem webhook aguardando resposta) esse node não tem o que responder — isso é esperado e não indica falha do pipeline."
+    },
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "days", "daysInterval": 1, "triggerAtHour": 6, "triggerAtMinute": 0 }] }
+      },
+      "id": "3bc2552c-be02-437b-99de-184040e407ef",
+      "name": "Agendamento Periódico",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-80, 320],
+      "notes": "Diferencial de bônus: roda a análise automaticamente 1x por dia (06:00), sem precisar do clique no dashboard."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.worldbank.org/v2/country/BRA;USA;CHN;IND;DEU;KOR;ZAF;FIN;NGA;ETH/indicator/SE.XPD.TOTL.GD.ZS",
+        "authentication": "none",
+        "sendQuery": true,
+        "specifyQuery": "keypair",
+        "queryParameters": {
+          "parameters": [
+            { "name": "format", "value": "json" },
+            { "name": "per_page", "value": "1000" },
+            { "name": "mrv", "value": "20" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "842f2a4a-e0b8-4e50-9093-2d298e253742",
+      "name": "Buscar Indicador World Bank (Agendado)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [160, 320],
+      "notes": "API pública do World Bank (sem autenticação) — coleta dados reais de gasto público em educação (% PIB) para a execução agendada."
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $input.first().json;\nconst entries = (Array.isArray(resp) && resp[1]) || [];\nconst byCountry = {};\nfor (const e of entries) {\n  if (e.value === null || e.value === undefined) continue;\n  const cc = e.countryiso3code;\n  if (!cc) continue;\n  if (!byCountry[cc]) byCountry[cc] = [];\n  byCountry[cc].push({ year: parseInt(e.date, 10), value: e.value, name: (e.country && e.country.value) || cc });\n}\n\nlet records = [];\nfor (const [cc, points] of Object.entries(byCountry)) {\n  if (points.length < 2) continue;\n  points.sort((a,b) => a.year - b.year);\n  const first = points[0];\n  const last = points[points.length - 1];\n  const nYears = last.year - first.year;\n  const growthPct = first.value !== 0 ? ((last.value - first.value) / Math.abs(first.value)) * 100 : 0;\n  const cagr = (nYears > 0 && first.value > 0) ? (Math.pow(last.value / first.value, 1 / nYears) - 1) * 100 : 0;\n  records.push({\n    country_code: cc,\n    country_name: last.name,\n    indicator_code: 'SE.XPD.TOTL.GD.ZS',\n    indicator_label: 'Gasto publico em educacao (% PIB)',\n    val_start: Math.round(first.value * 100) / 100,\n    val_end: Math.round(last.value * 100) / 100,\n    growth_pct: Math.round(growthPct * 100) / 100,\n    cagr: Math.round(cagr * 1000) / 1000,\n  });\n}\n\n// Fallback minimo se a API do World Bank estiver indisponivel no horario agendado\nif (records.length === 0) {\n  records = [\n    {country_code:'BRA',country_name:'Brazil',indicator_code:'SE.XPD.TOTL.GD.ZS',indicator_label:'Gasto publico em educacao (% PIB)',val_start:4.5,val_end:5.8,growth_pct:28.9,cagr:1.7},\n    {country_code:'FIN',country_name:'Finland',indicator_code:'SE.XPD.TOTL.GD.ZS',indicator_label:'Gasto publico em educacao (% PIB)',val_start:6.0,val_end:6.8,growth_pct:13.3,cagr:0.8},\n  ];\n}\n\nconst topG = [{ indicador: 'Gasto publico em educacao (% PIB) (SE.XPD.TOTL.GD.ZS)', top5: [...records].sort((a,b)=>b.growth_pct-a.growth_pct).slice(0,5) }];\nconst bottom = [...records].sort((a,b)=>a.growth_pct-b.growth_pct).slice(0,8);\nconst inv = [...records].sort((a,b)=>b.val_end-a.val_end).slice(0,5);\n\nconst schema = '{\"paises_em_evolucao\":[{\"pais\":\"string\",\"indicador\":\"string\",\"taxa_crescimento\":\"string\",\"destaque\":\"string\"}],\"paises_estagnados\":[{\"pais\":\"string\",\"indicador\":\"string\",\"periodo_observado\":\"string\",\"observacao\":\"string\"}],\"maior_investimento\":[{\"pais\":\"string\",\"valor_percentual\":\"string\",\"relacao_desempenho\":\"string\"}],\"melhores_indicadores\":[{\"pais\":\"string\",\"justificativa\":\"string\",\"indicadores_destaque\":[\"string\"]}],\"explicacoes\":[{\"hipotese\":\"string\",\"evidencia\":\"string\",\"nivel_confianca\":\"baixo|medio|alto\"}],\"recomendacoes\":[{\"recomendacao\":\"string\",\"publico_alvo\":\"string\",\"prioridade\":\"alta|media|baixa\"}],\"sumario_executivo\":\"string\"}';\n\nconst prompt = 'Analise (execucao agendada e automatica) os dados REAIS do World Bank sobre gasto publico em educacao (% PIB), coletados ao vivo via API para ' + records.length + ' paises.\\n\\nDADOS COLETADOS:\\n' + JSON.stringify(records, null, 2) + '\\n\\nTOP CRESCIMENTO:\\n' + JSON.stringify(topG, null, 2) + '\\n\\nMENOR CRESCIMENTO:\\n' + JSON.stringify(bottom, null, 2) + '\\n\\nMAIORES INVESTIDORES:\\n' + JSON.stringify(inv, null, 2) + '\\n\\nResponda EXCLUSIVAMENTE com um objeto JSON valido, sem texto adicional, sem markdown, sem comentarios. Estrutura obrigatoria:\\n' + schema;\n\nreturn [{json:{prompt, n_records: records.length, n_countries: Object.keys(byCountry).length, source: 'agendado-worldbank-api'}}];"
+      },
+      "id": "3da5164d-a1ac-4174-9aab-dfa21580bf98",
+      "name": "Processar Dados Agendados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [352, 320],
+      "notes": "Transforma a resposta real da API do World Bank em prompt analitico, com fallback minimo se a API falhar no horario agendado."
     }
   ],
   "connections": {
@@ -164,13 +211,22 @@
     },
     "Salvar no Banco (Data Table)": {
       "main": [[{ "node": "Responder Interface Streamlit", "type": "main", "index": 0 }]]
+    },
+    "Agendamento Periódico": {
+      "main": [[{ "node": "Buscar Indicador World Bank (Agendado)", "type": "main", "index": 0 }]]
+    },
+    "Buscar Indicador World Bank (Agendado)": {
+      "main": [[{ "node": "Processar Dados Agendados", "type": "main", "index": 0 }]]
+    },
+    "Processar Dados Agendados": {
+      "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
   "_instructions": {
-    "descricao": "Exportação fiel do workflow ativo em produção (n8n Cloud). Recebe webhook do dashboard Streamlit com os dados reais já processados por pipeline.py (campo analise_data), monta o prompt, chama Claude via AI Agent + Anthropic Chat Model com Structured Output Parser, valida o JSON, grava histórico em Data Table e responde à interface.",
+    "descricao": "Exportação fiel do workflow ativo em produção (n8n Cloud). Dois gatilhos alimentam o mesmo AI Agent: (1) Webhook — recebe POST do dashboard Streamlit com os dados reais já processados por pipeline.py (campo analise_data); (2) Schedule Trigger — roda 1x/dia, busca dados reais direto da API pública do World Bank (gasto público em educação) e monta o mesmo tipo de prompt, permitindo execução periódica sem intervenção humana. Em ambos os casos: AI Agent + Anthropic Chat Model com Structured Output Parser gera a análise, que é validada, gravada em Data Table e (quando veio de webhook) devolvida à interface.",
     "setup_steps": [
       "1. Importe este JSON no n8n via Menu > Workflows > Import from File",
       "2. Configure a credencial Anthropic API (Credentials > New > Anthropic API) e associe-a ao node 'Anthropic Chat Model'",

@@ -9,6 +9,7 @@ import threading
 import time
 from pathlib import Path
 
+import pandas as pd
 import plotly.express as px
 import requests
 import streamlit as st
@@ -58,7 +59,6 @@ def read_status() -> dict:
 
 def load_artifact(name: str):
     """Lê um artefato do diretório de outputs."""
-    import pandas as pd
     path = OUTPUT_DIR / name
     if not path.exists():
         return None
@@ -90,7 +90,6 @@ def _build_analise_data(params: dict) -> list:
     """Lê o analise_final.csv (gerado pelo pipeline.py local) e monta os registros
     no formato esperado pelo nó 'Preparar Dados e Prompt' do n8n, filtrando pelos
     países/indicadores selecionados na sidebar (se houver seleção)."""
-    import pandas as pd
     csv_path = OUTPUT_DIR / "analise_final.csv"
     if not csv_path.exists():
         return []
@@ -113,6 +112,36 @@ def _build_analise_data(params: dict) -> list:
     }
     cols = [c for c in column_map if c in df.columns]
     return df[cols].rename(columns=column_map).to_dict("records")
+
+
+# Limites de alerta por indicador (diferencial de bônus): sinaliza países cujo
+# valor mais recente ficou abaixo do patamar considerado adequado.
+INDICATOR_THRESHOLDS = {
+    "SE.XPD.TOTL.GD.ZS": {"limite": 4.0, "rotulo": "Gasto público em educação abaixo de 4% do PIB"},
+    "SE.PRM.ENRR": {"limite": 90.0, "rotulo": "Matrícula primária bruta abaixo de 90%"},
+    "SE.SEC.ENRR": {"limite": 60.0, "rotulo": "Matrícula secundária bruta abaixo de 60%"},
+    "SE.TER.ENRR": {"limite": 20.0, "rotulo": "Matrícula terciária bruta abaixo de 20%"},
+    "SE.PRM.CMPT.ZS": {"limite": 80.0, "rotulo": "Conclusão do ensino primário abaixo de 80%"},
+    "SE.ADT.LITR.ZS": {"limite": 80.0, "rotulo": "Alfabetização de adultos abaixo de 80%"},
+}
+
+
+def compute_alerts(df: pd.DataFrame) -> pd.DataFrame:
+    """Sinaliza combinações país/indicador cujo valor mais recente ('Valor Fim')
+    ficou abaixo do limite configurado em INDICATOR_THRESHOLDS."""
+    if df is None or df.empty:
+        return pd.DataFrame()
+    flagged = []
+    for indicator_code, cfg in INDICATOR_THRESHOLDS.items():
+        subset = df[(df["Indicator Code"] == indicator_code) & (df["Valor Fim"] < cfg["limite"])]
+        if subset.empty:
+            continue
+        flagged.append(subset.assign(Limite=cfg["limite"], Alerta=cfg["rotulo"])[
+            ["Country Name", "Country Code", "Indicador Label", "Valor Fim", "Limite", "Alerta"]
+        ])
+    if not flagged:
+        return pd.DataFrame()
+    return pd.concat(flagged, ignore_index=True).rename(columns={"Valor Fim": "Valor Atual"})
 
 
 def _webhook_thread(params: dict):
@@ -346,7 +375,12 @@ else:
         c4.metric("Registros", f"{len(df_growth):,}")
         st.divider()
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Rankings", "📈 Gráficos", "🤖 Relatório Claude", "⬇️ Downloads"])
+    df_alerts = compute_alerts(df_growth)
+
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(
+        ["📊 Rankings", "📈 Gráficos", "🤖 Relatório Claude", "⬇️ Downloads",
+         f"⚠️ Alertas ({len(df_alerts)})" if len(df_alerts) else "⚠️ Alertas"]
+    )
 
     # ── Tab 1: Rankings ───────────────────────────────────────────────────
     with tab1:
@@ -482,6 +516,17 @@ else:
                                    "relatorio.json", "application/json", use_container_width=True)
             else:
                 st.button("🔒 relatorio.json (não gerado)", disabled=True, use_container_width=True)
+
+    # ── Tab 5: Alertas ─────────────────────────────────────────────────────
+    with tab5:
+        st.subheader("Alertas de Limite por Indicador")
+        st.caption("Sinaliza países cujo valor mais recente ficou abaixo do patamar configurado. "
+                   "Limites em `INDICATOR_THRESHOLDS` (dashboard.py).")
+        if df_alerts is not None and len(df_alerts) > 0:
+            st.warning(f"⚠️ {len(df_alerts)} alerta(s) encontrado(s).")
+            st.dataframe(df_alerts, use_container_width=True, height=400)
+        else:
+            st.success("✅ Nenhum indicador abaixo dos limites configurados para a seleção atual.")
 
 
 # ─── Footer ──────────────────────────────────────────────────────────────────
