@@ -313,6 +313,15 @@ df_comparative = load_artifact("comparativo_paises.csv")
 df_historico = load_artifact("historico.csv")
 analysis = load_artifact("relatorio.json")
 
+# Aplica a seleção de países/indicadores da sidebar às tabelas e gráficos exibidos
+# (mesma convenção usada no payload enviado ao Claude: seleção vazia = mostra tudo).
+if df_growth is not None and selected_countries:
+    df_growth = df_growth[df_growth["Country Code"].isin(selected_countries)]
+if df_comparative is not None and selected_countries:
+    df_comparative = df_comparative[df_comparative["Country Code"].isin(selected_countries)]
+if df_historico is not None and selected_countries:
+    df_historico = df_historico[df_historico["Country Code"].isin(selected_countries)]
+
 has_data = df_growth is not None or analysis is not None
 
 if not has_data:
@@ -343,7 +352,8 @@ else:
     with tab1:
         if df_growth is not None and len(df_growth) > 0:
             st.subheader("Rankings por Indicador")
-            ind_opts = df_growth["Indicator Code"].unique().tolist()
+            all_ind = df_growth["Indicator Code"].unique().tolist()
+            ind_opts = [i for i in all_ind if not selected_indicators or i in selected_indicators] or all_ind
             sel = st.selectbox("Indicador", ind_opts,
                                 format_func=lambda x: df_growth[df_growth["Indicator Code"] == x]["Indicador Label"].iloc[0]
                                 if "Indicador Label" in df_growth.columns else x)
@@ -362,7 +372,8 @@ else:
     # ── Tab 2: Gráficos ───────────────────────────────────────────────────
     with tab2:
         if df_growth is not None and len(df_growth) > 0:
-            ind_opts2 = df_growth["Indicator Code"].unique().tolist()
+            all_ind2 = df_growth["Indicator Code"].unique().tolist()
+            ind_opts2 = [i for i in all_ind2 if not selected_indicators or i in selected_indicators] or all_ind2
             sel2 = st.selectbox("Indicador para gráficos", ind_opts2, key="g_ind",
                                  format_func=lambda x: df_growth[df_growth["Indicator Code"] == x]["Indicador Label"].iloc[0]
                                  if "Indicador Label" in df_growth.columns else x)
