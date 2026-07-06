@@ -47,6 +47,7 @@ st.markdown("""
 # ─── Helpers de estado e status ──────────────────────────────────────────────
 
 def read_status() -> dict:
+    """Lê o status atual do pipeline (arquivo pipeline_status.json)."""
     if STATUS_FILE.exists():
         try:
             return json.loads(STATUS_FILE.read_text(encoding="utf-8"))
@@ -100,19 +101,18 @@ def _build_analise_data(params: dict) -> list:
         df = df[df["Country Code"].isin(countries)]
     if indicators:
         df = df[df["Indicator Code"].isin(indicators)]
-    records = []
-    for _, row in df.iterrows():
-        records.append({
-            "country_code": row.get("Country Code"),
-            "country_name": row.get("Country Name"),
-            "indicator_code": row.get("Indicator Code"),
-            "indicator_label": row.get("Indicador Label"),
-            "val_start": row.get("Valor Inicio"),
-            "val_end": row.get("Valor Fim"),
-            "growth_pct": row.get("Crescimento %"),
-            "cagr": row.get("CAGR %"),
-        })
-    return records
+    column_map = {
+        "Country Code": "country_code",
+        "Country Name": "country_name",
+        "Indicator Code": "indicator_code",
+        "Indicador Label": "indicator_label",
+        "Valor Inicio": "val_start",
+        "Valor Fim": "val_end",
+        "Crescimento %": "growth_pct",
+        "CAGR %": "cagr",
+    }
+    cols = [c for c in column_map if c in df.columns]
+    return df[cols].rename(columns=column_map).to_dict("records")
 
 
 def _webhook_thread(params: dict):
