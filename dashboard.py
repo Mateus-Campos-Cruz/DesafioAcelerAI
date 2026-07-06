@@ -85,12 +85,53 @@ def _pipeline_thread(api_key: str, params: dict):
         write_status("error", f"Erro: {exc}", 0, error=traceback.format_exc())
 
 
+def _build_analise_data(params: dict) -> list:
+    """Lê o analise_final.csv (gerado pelo pipeline.py local) e monta os registros
+    no formato esperado pelo nó 'Preparar Dados e Prompt' do n8n, filtrando pelos
+    países/indicadores selecionados na sidebar (se houver seleção)."""
+    import pandas as pd
+    csv_path = OUTPUT_DIR / "analise_final.csv"
+    if not csv_path.exists():
+        return []
+    df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    countries = params.get("countries") or []
+    indicators = params.get("indicators") or []
+    if countries:
+        df = df[df["Country Code"].isin(countries)]
+    if indicators:
+        df = df[df["Indicator Code"].isin(indicators)]
+    records = []
+    for _, row in df.iterrows():
+        records.append({
+            "country_code": row.get("Country Code"),
+            "country_name": row.get("Country Name"),
+            "indicator_code": row.get("Indicator Code"),
+            "indicator_label": row.get("Indicador Label"),
+            "val_start": row.get("Valor Inicio"),
+            "val_end": row.get("Valor Fim"),
+            "growth_pct": row.get("Crescimento %"),
+            "cagr": row.get("CAGR %"),
+        })
+    return records
+
+
 def _webhook_thread(params: dict):
-    """Dispara o webhook n8n e salva artefatos de saída."""
-    from run_all import write_status
+    """Roda a coleta + pipeline de dados localmente (World Bank real) e então
+    dispara o webhook n8n com os dados já processados, para a análise via Claude."""
+    from run_all import write_status, stage_coleta, stage_pipeline
+    from claude_agent import build_markdown, generate_pdf
     try:
-        write_status("fetching", "Enviando para n8n — aguardando Claude...", 20)
-        resp = requests.post(WEBHOOK_URL, json=params, timeout=300,
+        write_status("fetching", "Etapa 1/3 — Coleta de dados do World Bank...", 5)
+        stage_coleta()
+
+        write_status("processing", "Etapa 2/3 — Processando dados com Python...", 25)
+        stage_pipeline()
+
+        write_status("analyzing", "Etapa 3/3 — Enviando dados reais para Claude via n8n...", 55)
+        analise_data = _build_analise_data(params)
+        payload = {**params, "analise_data": analise_data}
+
+        resp = requests.post(WEBHOOK_URL, json=payload, timeout=300,
                              headers={"Content-Type": "application/json"})
         # Capturar texto bruto antes de tentar parsear
         raw_text = resp.text
@@ -106,29 +147,25 @@ def _webhook_thread(params: dict):
                          error=f"Resposta recebida ({len(raw_text)} chars):\n{raw_text[:800]}")
             return
 
-        write_status("analyzing", "Processando resposta do Claude...", 80)
+        write_status("reporting", "Processando resposta do Claude...", 85)
         analysis = result.get("analysis")
         if result.get("status") == "success" and analysis:
             # Salvar JSON do Claude
             (OUTPUT_DIR / "relatorio.json").write_text(
                 json.dumps(analysis, ensure_ascii=False, indent=2), encoding="utf-8"
             )
-            # Salvar Markdown simples
-            md_lines = [
-                "# Relatório Executivo — Inteligência Educacional Global\n",
-                f"**Sumário:** {analysis.get('sumario_executivo', '')}\n",
-                "\n## Países em Evolução\n",
-            ]
-            for p in analysis.get("paises_em_evolucao", []):
-                md_lines.append(f"- **{p.get('pais')}**: {p.get('indicador')} — {p.get('taxa_crescimento')}\n")
-            md_lines.append("\n## Recomendações\n")
-            for r in analysis.get("recomendacoes", []):
-                md_lines.append(f"- [{r.get('prioridade','').upper()}] {r.get('recomendacao')}\n")
-            (OUTPUT_DIR / "relatorio.md").write_text("".join(md_lines), encoding="utf-8")
+            # Reaproveita o mesmo formatador de MD/PDF usado no modo local (claude_agent.py)
+            md_path = OUTPUT_DIR / "relatorio.md"
+            md_path.write_text(build_markdown(analysis), encoding="utf-8")
+            generate_pdf(md_path, OUTPUT_DIR / "relatorio.pdf")
 
             outputs = {
+                "analise_final.csv": str(OUTPUT_DIR / "analise_final.csv"),
+                "comparativo_paises.csv": str(OUTPUT_DIR / "comparativo_paises.csv"),
+                "historico.csv": str(OUTPUT_DIR / "historico.csv"),
                 "relatorio.json": str(OUTPUT_DIR / "relatorio.json"),
-                "relatorio.md": str(OUTPUT_DIR / "relatorio.md"),
+                "relatorio.md": str(md_path),
+                "relatorio.pdf": str(OUTPUT_DIR / "relatorio.pdf"),
             }
             write_status("done", "Análise via n8n concluída com sucesso.", 100, outputs=outputs)
         else:
@@ -137,7 +174,7 @@ def _webhook_thread(params: dict):
 
     except Exception as exc:
         import traceback
-        write_status("error", f"Erro no webhook: {exc}", 0, error=traceback.format_exc())
+        write_status("error", f"Erro no pipeline/webhook: {exc}", 0, error=traceback.format_exc())
 
 
 def start_execution(params: dict):

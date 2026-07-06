@@ -1,5 +1,5 @@
 {
-  "name": "Educação Global — Acelera AI Pipeline",
+  "name": "Educação Global — Pipeline Completo (Desafio Acelera AI)",
   "nodes": [
     {
       "parameters": {
@@ -8,142 +8,176 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-trigger",
-      "name": "Webhook Trigger",
+      "id": "a82f9471-389a-408d-86a1-0552aa416e25",
+      "name": "Acionar Análise",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [240, 300]
+      "typeVersion": 2.1,
+      "position": [-80, -128],
+      "notes": "Recebe POST do dashboard Streamlit (body: countries, indicators, analise_data já calculado pelo pipeline.py local)."
     },
     {
       "parameters": {
-        "command": "cd \"{{$env.PROJECT_DIR}}\" && python pipeline.py"
+        "jsCode": "const body = $input.first().json.body || {};\nconst countries = body.countries || ['BRA','USA','CHN','IND','DEU','KOR','ZAF','FIN','NGA','ETH'];\nconst indicators = body.indicators || ['SE.XPD.TOTL.GD.ZS','SE.PRM.ENRR','SE.SEC.ENRR','SE.TER.ENRR'];\n\nconst BASELINES = { 'SE.XPD.TOTL.GD.ZS': {'FIN':6.8,'SWE':7.1,'GBR':5.5,'FRA':5.4,'DEU':4.9,'USA':5.0,'KOR':4.9,'JPN':3.6,'BRA':5.8,'CHN':3.8,'IND':3.8,'MEX':4.9,'ARG':5.5,'COL':4.5,'ZAF':6.2,'NGA':2.8,'ETH':4.5,'RUS':4.1}, 'SE.PRM.ENRR': {'FIN':98,'SWE':99,'GBR':102,'FRA':105,'DEU':103,'USA':100,'KOR':101,'BRA':118,'CHN':112,'IND':108,'MEX':109,'ZAF':104,'NGA':85,'ETH':91,'RUS':101}, 'SE.SEC.ENRR': {'FIN':130,'SWE':133,'GBR':123,'FRA':112,'DEU':104,'USA':98,'KOR':98,'BRA':100,'CHN':87,'IND':63,'ZAF':98,'NGA':41,'ETH':35,'RUS':107}, 'SE.TER.ENRR': {'FIN':88,'SWE':72,'GBR':61,'FRA':65,'DEU':70,'USA':88,'KOR':95,'BRA':48,'CHN':48,'IND':25,'ZAF':21,'NGA':10,'ETH':8,'RUS':81}, 'SE.PRM.CMPT.ZS': {'FIN':99,'GBR':99,'USA':98,'KOR':99,'BRA':97,'CHN':95,'IND':88,'ZAF':98,'NGA':69,'ETH':52,'RUS':99}, 'SE.ADT.LITR.ZS': {'FIN':99,'GBR':99,'USA':99,'KOR':99,'BRA':91,'CHN':95,'IND':73,'ZAF':87,'NGA':60,'ETH':51,'RUS':99} };\nconst NAMES = {'BRA':'Brazil','USA':'United States','CHN':'China','IND':'India','DEU':'Germany','FRA':'France','GBR':'United Kingdom','JPN':'Japan','KOR':'Korea, Rep.','MEX':'Mexico','ARG':'Argentina','COL':'Colombia','ZAF':'South Africa','NGA':'Nigeria','ETH':'Ethiopia','EGY':'Egypt, Arab Rep.','IDN':'Indonesia','TUR':'Turkiye','SAU':'Saudi Arabia','RUS':'Russian Federation','CHL':'Chile','PER':'Peru','FIN':'Finland','SWE':'Sweden'};\nconst LABELS = {'SE.XPD.TOTL.GD.ZS':'Gasto publico em educacao (% PIB)','SE.PRM.ENRR':'Matricula primaria (bruta %)','SE.SEC.ENRR':'Matricula secundaria (bruta %)','SE.TER.ENRR':'Matricula terciaria (bruta %)','SE.PRM.CMPT.ZS':'Conclusao primaria (%)','SE.ADT.LITR.ZS':'Alfabetizacao adultos (%)'};\n\n// analise_data: enviado pelo dashboard.py com os dados REAIS ja processados pelo pipeline.py\n// (fallback sintetico abaixo so' e usado se o dashboard nao enviar analise_data)\nconst precomputed = body.analise_data;\nlet records;\nif (precomputed && Array.isArray(precomputed) && precomputed.length > 0) {\n  records = precomputed;\n} else {\n  const actC = countries.filter(c => NAMES[c]);\n  const actI = indicators.filter(i => LABELS[i]);\n  records = [];\n  for (const cc of actC) {\n    for (const ic of actI) {\n      const base = (BASELINES[ic] || {})[cc] || 50;\n      const isDev = ['NGA','ETH','IND','IDN','EGY','PER','COL','CHN','BRA'].includes(cc);\n      const trend = isDev ? (Math.random()*1.2+0.3) : (Math.random()*0.7-0.2);\n      const vS = base;\n      let v = base;\n      for (let y=0;y<19;y++) { v = Math.max(1, v+trend+(Math.random()-0.5)*base*0.03); }\n      const gPct = vS>0 ? ((v-vS)/Math.abs(vS))*100 : 0;\n      const cagr = vS>0 ? (Math.pow(v/vS,1/19)-1)*100 : 0;\n      records.push({country_code:cc,country_name:NAMES[cc],indicator_code:ic,indicator_label:LABELS[ic],val_start:Math.round(vS*100)/100,val_end:Math.round(v*100)/100,growth_pct:Math.round(gPct*100)/100,cagr:Math.round(cagr*1000)/1000});\n    }\n  }\n}\n\nconst byI = {};\nfor (const r of records) { if(!byI[r.indicator_code])byI[r.indicator_code]=[]; byI[r.indicator_code].push(r); }\nconst topG = Object.entries(byI).map(([c,rows])=>({indicador:rows[0].indicator_label+' ('+c+')',top5:rows.sort((a,b)=>b.growth_pct-a.growth_pct).slice(0,5)}));\nconst bottom = [].concat(records).sort((a,b)=>a.growth_pct-b.growth_pct).slice(0,8);\nconst inv = records.filter(r=>r.indicator_code==='SE.XPD.TOTL.GD.ZS').sort((a,b)=>b.val_end-a.val_end).slice(0,5);\n\nconst schema = '{\"paises_em_evolucao\":[{\"pais\":\"string\",\"indicador\":\"string\",\"taxa_crescimento\":\"string\",\"destaque\":\"string\"}],\"paises_estagnados\":[{\"pais\":\"string\",\"indicador\":\"string\",\"periodo_observado\":\"string\",\"observacao\":\"string\"}],\"maior_investimento\":[{\"pais\":\"string\",\"valor_percentual\":\"string\",\"relacao_desempenho\":\"string\"}],\"melhores_indicadores\":[{\"pais\":\"string\",\"justificativa\":\"string\",\"indicadores_destaque\":[\"string\"]}],\"explicacoes\":[{\"hipotese\":\"string\",\"evidencia\":\"string\",\"nivel_confianca\":\"baixo|medio|alto\"}],\"recomendacoes\":[{\"recomendacao\":\"string\",\"publico_alvo\":\"string\",\"prioridade\":\"alta|media|baixa\"}],\"sumario_executivo\":\"string\"}';\n\nconst prompt = 'Analise os dados educacionais do World Bank EdStats para ' + countries.length + ' paises (2000-2020).\\n\\nTOP CRESCIMENTO POR INDICADOR:\\n' + JSON.stringify(topG,null,2) + '\\n\\nPAISES COM MENOR CRESCIMENTO (ESTAGNACAO):\\n' + JSON.stringify(bottom,null,2) + '\\n\\nMAIORES INVESTIDORES (% PIB em Educacao):\\n' + JSON.stringify(inv,null,2) + '\\n\\nResponda EXCLUSIVAMENTE com um objeto JSON valido, sem texto adicional, sem markdown, sem comentarios. Estrutura obrigatoria:\\n' + schema;\n\nreturn [{json:{prompt,n_records:records.length,n_countries:countries.length,source:precomputed?'streamlit':'sintetico'}}];",
+        "notes": "Monta o prompt analitico. Usa analise_data (dados reais do World Bank ja processados por pipeline.py) quando enviado pelo dashboard; caso contrario gera dados sinteticos de demonstracao."
       },
-      "id": "run-pipeline",
-      "name": "Executar Pipeline Python",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [460, 300],
-      "notes": "Roda o pipeline Python (ingestão + limpeza + analytics). PROJECT_DIR deve apontar para o diretório do projeto."
+      "id": "789083fc-ff6c-4915-859d-cebf0cc4483a",
+      "name": "Preparar Dados e Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [160, -128]
     },
     {
       "parameters": {
-        "conditions": {
-          "number": [
-            {
-              "value1": "={{$json.exitCode}}",
-              "operation": "equal",
-              "value2": 0
-            }
-          ]
-        }
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-6",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": { "maxTokensToSample": 4096 }
       },
-      "id": "check-exit-code",
-      "name": "Pipeline OK?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [680, 300]
+      "id": "880f75cd-e63d-427a-bed6-3ebb582297aa",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [352, 80],
+      "credentials": {
+        "anthropicApi": { "id": "ICLofg1OFIB9ylJQ", "name": "Anthropic account" }
+      }
     },
     {
       "parameters": {
-        "command": "cd \"{{$env.PROJECT_DIR}}\" && python claude_agent.py"
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"paises_em_evolucao\": { \"type\": \"array\", \"description\": \"Paises com maior evolucao positiva.\", \"items\": { \"type\": \"object\", \"properties\": { \"pais\": {\"type\":\"string\"}, \"indicador\": {\"type\":\"string\"}, \"taxa_crescimento\": {\"type\":\"string\"}, \"destaque\": {\"type\":\"string\"} }, \"required\": [\"pais\",\"indicador\",\"taxa_crescimento\"] } },\n    \"paises_estagnados\": { \"type\": \"array\", \"description\": \"Paises com estagnacao ou retrocesso.\", \"items\": { \"type\": \"object\", \"properties\": { \"pais\":{\"type\":\"string\"}, \"indicador\":{\"type\":\"string\"}, \"periodo_observado\":{\"type\":\"string\"}, \"observacao\":{\"type\":\"string\"} }, \"required\": [\"pais\",\"indicador\",\"periodo_observado\"] } },\n    \"maior_investimento\": { \"type\": \"array\", \"description\": \"Paises com maior investimento publico.\", \"items\": { \"type\": \"object\", \"properties\": { \"pais\":{\"type\":\"string\"}, \"valor_percentual\":{\"type\":\"string\"}, \"relacao_desempenho\":{\"type\":\"string\"} }, \"required\": [\"pais\",\"valor_percentual\"] } },\n    \"melhores_indicadores\": { \"type\": \"array\", \"description\": \"Paises com melhores indicadores gerais.\", \"items\": { \"type\": \"object\", \"properties\": { \"pais\":{\"type\":\"string\"}, \"justificativa\":{\"type\":\"string\"}, \"indicadores_destaque\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}} }, \"required\": [\"pais\",\"justificativa\"] } },\n    \"explicacoes\": { \"type\": \"array\", \"description\": \"Hipoteses explicativas.\", \"items\": { \"type\": \"object\", \"properties\": { \"hipotese\":{\"type\":\"string\"}, \"evidencia\":{\"type\":\"string\"}, \"nivel_confianca\":{\"type\":\"string\",\"enum\":[\"baixo\",\"medio\",\"alto\"]} }, \"required\": [\"hipotese\",\"evidencia\",\"nivel_confianca\"] } },\n    \"recomendacoes\": { \"type\": \"array\", \"description\": \"Recomendacoes praticas.\", \"items\": { \"type\": \"object\", \"properties\": { \"recomendacao\":{\"type\":\"string\"}, \"publico_alvo\":{\"type\":\"string\"}, \"prioridade\":{\"type\":\"string\",\"enum\":[\"alta\",\"media\",\"baixa\"]} }, \"required\": [\"recomendacao\",\"publico_alvo\",\"prioridade\"] } },\n    \"sumario_executivo\": { \"type\": \"string\", \"description\": \"Paragrafo curto com o principal insight.\" }\n  },\n  \"required\": [\"paises_em_evolucao\",\"paises_estagnados\",\"maior_investimento\",\"melhores_indicadores\",\"explicacoes\",\"recomendacoes\",\"sumario_executivo\"]\n}"
       },
-      "id": "run-claude-agent",
-      "name": "Executar Claude Agent",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [900, 200],
-      "notes": "Roda o agente Claude: lê analise_final.csv, chama Anthropic API, gera relatorio.json + relatorio.md + relatorio.pdf"
+      "id": "16889430-005c-41bd-a353-9e0f82aec7ca",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [560, 80],
+      "notes": "Forca o AI Agent a devolver JSON no schema exigido pelo desafio (evolucao, estagnacao, investimento, indicadores, hipoteses, recomendacoes)."
     },
     {
       "parameters": {
-        "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "anthropicApi",
-        "requestMethod": "POST",
-        "jsonParameters": true,
-        "bodyParametersJson": "={\n  \"model\": \"claude-sonnet-4-6\",\n  \"max_tokens\": 4096,\n  \"system\": \"Você é um agente especializado em inteligência analítica sobre indicadores educacionais globais. Seu objetivo é transformar dados quantitativos em análise executiva e recomendações.\",\n  \"tools\": [{{$env.ANALYSIS_TOOL_JSON}}],\n  \"tool_choice\": {\"type\": \"tool\", \"name\": \"registrar_analise_educacional\"},\n  \"messages\": [{\"role\": \"user\", \"content\": \"{{$json.prompt}}\"}]\n}",
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": true,
         "options": {
-          "timeout": 120000
+          "systemMessage": "Voce e um agente especializado em inteligencia analitica sobre indicadores educacionais globais. Transforme dados em analise executiva com insights sobre evolucao, estagnacao, investimentos e tendencias educacionais. Explicacoes causais devem ser hipoteses baseadas nos dados. Use sempre a estrutura de saida fornecida."
         }
       },
-      "id": "claude-api-call",
-      "name": "Chamar Anthropic API (alternativo)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 3,
-      "position": [900, 400],
-      "notes": "Alternativa: chamar a API da Anthropic diretamente via HTTP Request no n8n (sem rodar claude_agent.py). Use se preferir não executar script Python separado para o Claude."
+      "id": "3ceb2950-b6de-41f2-92d9-992780479074",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [448, -128],
+      "notes": "Agente de IA (Claude via Anthropic Chat Model) com Structured Output Parser anexado para saida JSON garantida."
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.output;\nlet analysis = null;\nlet errorMsg = null;\n\nif (raw && typeof raw === 'object') {\n  analysis = raw;\n} else if (typeof raw === 'string') {\n  try {\n    let jsonStr = raw.trim();\n    const mdMatch = jsonStr.match(/```(?:json)?\\s*([\\s\\S]*?)\\s*```/);\n    if (mdMatch) jsonStr = mdMatch[1].trim();\n    const s = jsonStr.indexOf('{');\n    const e = jsonStr.lastIndexOf('}');\n    if (s !== -1 && e !== -1) jsonStr = jsonStr.slice(s, e+1);\n    analysis = JSON.parse(jsonStr);\n  } catch (ex) {\n    errorMsg = 'Falha ao parsear saida do agente: ' + ex.message + '. Output: ' + String(raw).substring(0, 300);\n  }\n} else {\n  errorMsg = 'AI Agent nao retornou output esperado.';\n}\n\nconst requiredKeys = ['paises_em_evolucao','paises_estagnados','maior_investimento','melhores_indicadores','explicacoes','recomendacoes','sumario_executivo'];\nconst missingKeys = analysis ? requiredKeys.filter(k => !analysis[k]) : requiredKeys;\n\nreturn [{json:{\n  status: analysis && missingKeys.length === 0 ? 'success' : 'error',\n  analysis: analysis || null,\n  error: errorMsg || (missingKeys.length > 0 ? 'Campos ausentes: '+missingKeys.join(',') : null),\n  model: 'claude-sonnet-4-6',\n  usage: {},\n  campos_presentes: analysis ? Object.keys(analysis) : [],\n  timestamp: new Date().toISOString()\n}}];"
+      },
+      "id": "81f3d83f-117c-494a-8d69-5b9407824a43",
+      "name": "Extrair Analise Claude",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [672, -128],
+      "notes": "Valida se todas as chaves obrigatorias do schema vieram preenchidas e normaliza o payload de resposta."
+    },
+    {
+      "parameters": {
+        "dataTableId": { "__rl": true, "mode": "id", "value": "sxlOnlP3ybci8dX7" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ new Date().toISOString() }}",
+            "status": "={{ $json.status }}",
+            "n_paises": "={{ ($json.analysis?.paises_em_evolucao?.length || 0) + ($json.analysis?.paises_estagnados?.length || 0) }}",
+            "sumario_executivo": "={{ ($json.analysis?.sumario_executivo || '').substring(0, 1000) }}",
+            "paises_evolucao": "={{ JSON.stringify($json.analysis?.paises_em_evolucao || []).substring(0, 2000) }}",
+            "paises_estagnados": "={{ JSON.stringify($json.analysis?.paises_estagnados || []).substring(0, 2000) }}",
+            "recomendacoes": "={{ JSON.stringify($json.analysis?.recomendacoes || []).substring(0, 2000) }}",
+            "modelo_ia": "={{ $json.model || 'claude-sonnet-4-6' }}",
+            "tokens_usados": "={{ ($json.usage?.input_tokens || 0) + ($json.usage?.output_tokens || 0) }}"
+          },
+          "schema": [
+            { "id": "timestamp", "displayName": "timestamp", "required": false, "defaultMatch": false, "display": true, "type": "date", "canBeUsedToMatch": false },
+            { "id": "status", "displayName": "status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "n_paises", "displayName": "n_paises", "required": false, "defaultMatch": false, "display": true, "type": "number", "canBeUsedToMatch": false },
+            { "id": "sumario_executivo", "displayName": "sumario_executivo", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "paises_evolucao", "displayName": "paises_evolucao", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "paises_estagnados", "displayName": "paises_estagnados", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "recomendacoes", "displayName": "recomendacoes", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "modelo_ia", "displayName": "modelo_ia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": false },
+            { "id": "tokens_usados", "displayName": "tokens_usados", "required": false, "defaultMatch": false, "display": true, "type": "number", "canBeUsedToMatch": false }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bb6e2581-e260-460f-99db-abe04588713f",
+      "name": "Salvar no Banco (Data Table)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [864, -128],
+      "onError": "continueRegularOutput",
+      "notes": "Storage do n8n (requisito 'gatilho + script + IA + storage'): histórico de execuções fica auditável dentro do próprio n8n."
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ status: 'success', message: 'Pipeline e análise Claude concluídos', outputs: { analise_final_csv: $env.PROJECT_DIR + '/outputs/analise_final.csv', relatorio_json: $env.PROJECT_DIR + '/outputs/relatorio.json', relatorio_md: $env.PROJECT_DIR + '/outputs/relatorio.md', relatorio_pdf: $env.PROJECT_DIR + '/outputs/relatorio.pdf' } }) }}",
+        "responseBody": "={{ $('Extrair Analise Claude').item.json }}",
         "options": {
+          "responseCode": 200,
           "responseHeaders": {
-            "values": [
-              {"name": "Content-Type", "value": "application/json"}
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
             ]
           }
         }
       },
-      "id": "respond-success",
-      "name": "Responder Sucesso",
+      "id": "96359e92-508f-4a0a-ad7f-1bdebaefaab3",
+      "name": "Responder Interface Streamlit",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [1120, 200]
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ status: 'error', message: 'Falha no pipeline Python', detail: $json.stderr }) }}",
-        "options": {
-          "responseCode": 500
-        }
-      },
-      "id": "respond-error",
-      "name": "Responder Erro",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [900, 520]
+      "typeVersion": 1.5,
+      "position": [1040, -128]
     }
   ],
   "connections": {
-    "Webhook Trigger": {
-      "main": [
-        [{"node": "Executar Pipeline Python", "type": "main", "index": 0}]
-      ]
+    "Acionar Análise": {
+      "main": [[{ "node": "Preparar Dados e Prompt", "type": "main", "index": 0 }]]
     },
-    "Executar Pipeline Python": {
-      "main": [
-        [{"node": "Pipeline OK?", "type": "main", "index": 0}]
-      ]
+    "Preparar Dados e Prompt": {
+      "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]]
     },
-    "Pipeline OK?": {
-      "main": [
-        [{"node": "Executar Claude Agent", "type": "main", "index": 0}],
-        [{"node": "Responder Erro", "type": "main", "index": 0}]
-      ]
+    "Anthropic Chat Model": {
+      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
     },
-    "Executar Claude Agent": {
-      "main": [
-        [{"node": "Responder Sucesso", "type": "main", "index": 0}]
-      ]
+    "Structured Output Parser": {
+      "ai_outputParser": [[{ "node": "AI Agent", "type": "ai_outputParser", "index": 0 }]]
+    },
+    "AI Agent": {
+      "main": [[{ "node": "Extrair Analise Claude", "type": "main", "index": 0 }]]
+    },
+    "Extrair Analise Claude": {
+      "main": [[{ "node": "Salvar no Banco (Data Table)", "type": "main", "index": 0 }]]
+    },
+    "Salvar no Banco (Data Table)": {
+      "main": [[{ "node": "Responder Interface Streamlit", "type": "main", "index": 0 }]]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
   "_instructions": {
-    "variables_to_set": {
-      "PROJECT_DIR": "Caminho absoluto para o diretório do projeto (ex: C:/Mateus/Desafio Acelerai Kaggle)",
-      "ANTHROPIC_API_KEY": "Sua chave da API Anthropic (armazenar como credencial n8n, não variável de ambiente)"
-    },
+    "descricao": "Exportação fiel do workflow ativo em produção (n8n Cloud). Recebe webhook do dashboard Streamlit com os dados reais já processados por pipeline.py (campo analise_data), monta o prompt, chama Claude via AI Agent + Anthropic Chat Model com Structured Output Parser, valida o JSON, grava histórico em Data Table e responde à interface.",
     "setup_steps": [
       "1. Importe este JSON no n8n via Menu > Workflows > Import from File",
-      "2. Configure PROJECT_DIR nas variáveis de ambiente do n8n",
-      "3. Adicione a credencial Anthropic API Key no n8n (Credentials > New > Anthropic API)",
+      "2. Configure a credencial Anthropic API (Credentials > New > Anthropic API) e associe-a ao node 'Anthropic Chat Model'",
+      "3. Crie/associe uma Data Table para o node 'Salvar no Banco (Data Table)' (ou troque por um Set/NoOp se não quiser persistir histórico)",
       "4. Ative o workflow",
       "5. Copie a URL do Webhook gerada e cole no .env do projeto como WEBHOOK_URL",
-      "6. Se rodar n8n localmente sem domínio público, use ngrok para expor o webhook: ngrok http 5678"
+      "6. O dashboard (dashboard.py) roda pipeline.py localmente antes de chamar o webhook e envia o resultado real no campo analise_data — sem isso, o node 'Preparar Dados e Prompt' cai no fallback sintético de demonstração"
     ]
   }
 }
