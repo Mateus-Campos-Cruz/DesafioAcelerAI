@@ -15,6 +15,8 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
+from pipeline import INDICATORS_PRIORITY
+
 load_dotenv()
 
 OUTPUT_DIR = Path(__file__).parent / "outputs"
@@ -144,6 +146,29 @@ def compute_alerts(df: pd.DataFrame) -> pd.DataFrame:
     return pd.concat(flagged, ignore_index=True).rename(columns={"Valor Fim": "Valor Atual"})
 
 
+# Rótulos legíveis para colunas técnicas exibidas nas tabelas do dashboard.
+COLUMN_LABELS = {
+    "Country Code": "Código",
+    "Country Name": "País",
+    "Indicador Label": "Indicador",
+    "Valor Inicio": "Valor Inicial",
+    "Valor Fim": "Valor Atual",
+    "Crescimento %": "Crescimento (%)",
+    "CAGR %": "CAGR (%)",
+    "Rank Valor Atual": "Rank (Valor)",
+    "Rank Crescimento %": "Rank (Crescimento)",
+    "Media_CAGR": "CAGR Médio (%)",
+    "Soma_Crescimento_Pct": "Soma do Crescimento (%)",
+    "N_Indicadores": "Nº de Indicadores",
+    **INDICATORS_PRIORITY,
+}
+
+
+def friendly_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Renomeia colunas técnicas (códigos de indicador, nomes internos) para rótulos legíveis."""
+    return df.rename(columns=COLUMN_LABELS)
+
+
 def _webhook_thread(params: dict):
     """Roda a coleta + pipeline de dados localmente (World Bank real) e então
     dispara o webhook n8n com os dados já processados, para a análise via Claude."""
@@ -172,8 +197,18 @@ def _webhook_thread(params: dict):
         try:
             result = resp.json()
         except Exception as json_err:
-            write_status("error", f"Resposta n8n não é JSON: {json_err}", 0,
-                         error=f"Resposta recebida ({len(raw_text)} chars):\n{raw_text[:800]}")
+            if not raw_text.strip():
+                write_status(
+                    "error",
+                    "n8n não retornou resposta — a execução provavelmente falhou antes do fim "
+                    "(ex.: erro na chamada ao Claude por falta de crédito na conta Anthropic).",
+                    0,
+                    error="Resposta vazia (0 chars). Verifique o histórico de execuções do "
+                          "workflow no n8n para ver o erro real (node que falhou).",
+                )
+            else:
+                write_status("error", f"Resposta n8n não é JSON: {json_err}", 0,
+                             error=f"Resposta recebida ({len(raw_text)} chars):\n{raw_text[:800]}")
             return
 
         write_status("reporting", "Processando resposta do Claude...", 85)
@@ -395,11 +430,15 @@ else:
             show_cols = [c for c in ["Country Name","Country Code","Valor Inicio","Valor Fim",
                                       "Crescimento %","CAGR %","Rank Valor Atual","Rank Crescimento %"]
                          if c in df_sel.columns]
-            st.dataframe(df_sel[show_cols], use_container_width=True, height=400)
+            st.dataframe(friendly_columns(df_sel[show_cols]), use_container_width=True, height=400)
 
             if df_comparative is not None:
                 st.subheader("Comparativo entre Países")
-                st.dataframe(df_comparative, use_container_width=True, height=300)
+                df_comp_display = df_comparative.copy()
+                if "Country Code" in df_comp_display.columns and df_growth is not None:
+                    name_map = df_growth.drop_duplicates("Country Code").set_index("Country Code")["Country Name"]
+                    df_comp_display.insert(1, "Country Name", df_comp_display["Country Code"].map(name_map))
+                st.dataframe(friendly_columns(df_comp_display), use_container_width=True, height=300)
         else:
             st.info("Dados não disponíveis — execute a análise.")
 
@@ -487,6 +526,10 @@ else:
             relatorio_md = load_artifact("relatorio.md")
             if relatorio_md:
                 st.markdown(relatorio_md)
+            elif df_growth is not None and len(df_growth) > 0:
+                st.warning("O pipeline de dados já rodou (veja as abas Rankings/Gráficos), mas o "
+                           "relatório do Claude ainda não foi gerado — confira a mensagem de status "
+                           "no topo da página para ver se houve erro na etapa de IA.")
             else:
                 st.info("Execute a análise para ver o relatório gerado pelo Claude.")
 
@@ -524,7 +567,7 @@ else:
                    "Limites em `INDICATOR_THRESHOLDS` (dashboard.py).")
         if df_alerts is not None and len(df_alerts) > 0:
             st.warning(f"⚠️ {len(df_alerts)} alerta(s) encontrado(s).")
-            st.dataframe(df_alerts, use_container_width=True, height=400)
+            st.dataframe(friendly_columns(df_alerts), use_container_width=True, height=400)
         else:
             st.success("✅ Nenhum indicador abaixo dos limites configurados para a seleção atual.")
 
