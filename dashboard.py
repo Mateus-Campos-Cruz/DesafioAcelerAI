@@ -15,6 +15,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 
+from fetch_worldbank import COUNTRY_NAMES
 from pipeline import INDICATORS_PRIORITY
 
 load_dotenv()
@@ -28,7 +29,7 @@ st.set_page_config(
     page_title="Educação Global — Acelera AI",
     page_icon="🎓",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown("""
@@ -258,29 +259,27 @@ def start_execution(params: dict):
     t.start()
 
 
-# ─── Sidebar ─────────────────────────────────────────────────────────────────
+# ─── Header ──────────────────────────────────────────────────────────────────
 
-with st.sidebar:
-    st.markdown("### ⚙️ Configurações")
+st.markdown('<div class="main-title">🎓 Inteligência Educacional Global</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Desafio Acelera AI · World Bank EdStats · Claude + n8n + Streamlit</div>',
+            unsafe_allow_html=True)
+st.caption("Fonte dos dados: World Bank EdStats")
+st.divider()
 
-    mode = "n8n Webhook" if WEBHOOK_URL else "Local (sem n8n)"
-    st.info(f"Modo: **{mode}**")
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if api_key:
-        st.success("Anthropic API: ✓ configurada")
-    else:
-        st.warning("Anthropic API: não configurada\nDefina ANTHROPIC_API_KEY no `.env`")
+# ─── Filtros ─────────────────────────────────────────────────────────────────
 
-    st.markdown("---")
-    st.markdown("**Filtros opcionais**")
-
-    all_countries = ["BRA","USA","CHN","IND","DEU","FRA","GBR","JPN",
-                     "KOR","MEX","ARG","COL","ZAF","NGA","ETH","EGY",
-                     "IDN","TUR","SAU","RUS","CHL","PER","FIN","SWE"]
-    selected_countries = st.multiselect("Países", all_countries,
-                                        default=["BRA","USA","CHN","IND","DEU","KOR","ZAF"])
-
+st.subheader("🔎 Filtros")
+col_f1, col_f2 = st.columns(2)
+with col_f1:
+    all_countries = list(COUNTRY_NAMES.keys())
+    selected_countries = st.multiselect(
+        "Países", all_countries,
+        default=["BRA", "USA", "CHN", "IND", "DEU", "KOR", "ZAF"],
+        format_func=lambda x: COUNTRY_NAMES.get(x, x),
+    )
+with col_f2:
     indicators_map = {
         "SE.XPD.TOTL.GD.ZS": "Gasto em educação (% PIB)",
         "SE.PRM.ENRR": "Matrícula primária",
@@ -292,16 +291,6 @@ with st.sidebar:
     selected_indicators = st.multiselect("Indicadores", list(indicators_map.keys()),
                                           default=list(indicators_map.keys())[:4],
                                           format_func=lambda x: indicators_map[x])
-
-    st.markdown("---")
-    st.caption("Dados: World Bank EdStats\nIA: Claude claude-sonnet-4-6\nOrq: n8n")
-
-
-# ─── Header ──────────────────────────────────────────────────────────────────
-
-st.markdown('<div class="main-title">🎓 Inteligência Educacional Global</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Desafio Acelera AI · World Bank EdStats · Claude + n8n + Streamlit</div>',
-            unsafe_allow_html=True)
 st.divider()
 
 
