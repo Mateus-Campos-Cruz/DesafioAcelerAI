@@ -331,19 +331,25 @@ with col_progress:
     ]
 
     # Chips de estágio
+    # current_idx = -1 para estágios que ainda não chegaram em nenhuma etapa da lista
+    # (ex.: "starting" logo após clicar em Executar Análise) — evita que todos os
+    # chips apareçam verdes antes de qualquer etapa real ter começado.
+    stage_order = [s[0] for s in STAGES]
+    try:
+        current_idx = stage_order.index(stage)
+    except ValueError:
+        current_idx = -1
+
     chips_html = ""
-    active_stages = [s[0] for s in STAGES]
-    reached = False
-    for s_key, s_label in STAGES:
+    for i, (s_key, s_label) in enumerate(STAGES):
         if stage == "error":
             cls = "chip-error"
         elif stage == "done":
             cls = "chip-done"
-        elif s_key == stage:
-            cls = "chip-active"
-            reached = True
-        elif not reached:
+        elif i < current_idx:
             cls = "chip-done"
+        elif i == current_idx:
+            cls = "chip-active"
         else:
             cls = "chip-pending"
         chips_html += f'<span class="stage-chip {cls}">{s_label}</span>'
