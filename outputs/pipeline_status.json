@@ -2,7 +2,7 @@
   "stage": "done",
   "stage_label": "Análise via n8n concluída com sucesso.",
   "progress_pct": 100,
-  "updated_at": "2026-07-06 20:44:34",
+  "updated_at": "2026-07-06 22:41:24",
   "error": null,
   "outputs": {
     "analise_final.csv": "C:\\Mateus\\Desafio Acelerai Kaggle\\outputs\\analise_final.csv",
